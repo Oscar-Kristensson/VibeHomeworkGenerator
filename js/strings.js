@@ -30,8 +30,13 @@ export const S = {
   'form.statementRequired': 'Write the problem text first.',
   'form.mathError': 'Check the math: {msg}',
 
-  'gen.title': 'Generators are not built yet',
-  'gen.body': 'Worksheets already store a generator name, its settings and a seed for each generated problem, so files you save now will keep working once generators arrive.',
+  'gen.generator': 'Kind of problem',
+  'gen.settings': 'Settings',
+  'gen.count': 'How many',
+  'gen.points': 'Points each',
+  'gen.button': 'Generate problems',
+  'gen.countInvalid': 'Enter a number from 1 to {max}.',
+  'gen.noneNew': 'No new problems could be made with these settings. Widen the number range or change an option.',
 
   'sheet.titlePlaceholder': 'Untitled worksheet',
   'sheet.subjectPlaceholder': 'Subject or class',
@@ -56,6 +61,7 @@ export const S = {
   'problem.up': 'Move up',
   'problem.down': 'Move down',
   'problem.edit': 'Edit',
+  'problem.regenerate': 'Regenerate',
   'problem.duplicate': 'Duplicate',
   'problem.delete': 'Delete',
   'problem.drag': 'Drag to reorder',
@@ -69,6 +75,10 @@ export const S = {
   'problem.tools': 'Actions for problem {n}',
 
   'toast.added': 'Problem added',
+  'toast.generated.one': '{n} problem added',
+  'toast.generated.other': '{n} problems added',
+  'toast.generatedFewer': 'Added {made} of {wanted}. These settings allow few different problems.',
+  'toast.regenerateFailed': 'This problem could not be regenerated. Check its generator and params in the JSON.',
   'toast.updated': 'Problem updated',
   'toast.deleted': 'Problem deleted',
   'toast.undo': 'Undo',
@@ -84,6 +94,7 @@ export const S = {
   'count.problem.one': '{n} problem',
   'count.problem.other': '{n} problems',
 
+  'confirm.regenerateEdited': 'This problem was edited by hand. Replace it with a new generated one?',
   'confirm.discard': 'You have unsaved changes. Discard them?',
   'worksheet.untitled': 'Untitled worksheet',
 

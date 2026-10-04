@@ -20,9 +20,32 @@ It also works unchanged on GitHub Pages or any static host.
 | 1. Skeleton, KaTeX, state, layout | done |
 | 2. Custom problems with live preview, list with edit / reorder / delete | done |
 | 3. JSON save / open / validation / autosave | done |
-| 4. Generators | next |
-| 5. HTML export | planned |
+| 4. Generators: registry, auto-built settings form, 10 generators, regenerate | done |
+| 5. HTML export | next |
 | 6. Polish (JSON editor, tests page, more generators) | planned |
+
+## Generators
+
+Open the **Generate** tab, pick a kind of problem, adjust its settings, choose how many, and click *Generate problems*. They are added to the worksheet (Undo is offered). On the worksheet, **Regenerate** gives a problem a new seed, **Edit** changes its text by hand, and **Delete** removes it.
+
+| Category | Generators |
+|---|---|
+| Arithmetic | `arithmetic.integers` |
+| Fractions | `fractions.addSubtract`, `fractions.multiply`, `fractions.simplify` |
+| Algebra | `linearEquations.oneStep`, `linearEquations.twoStep`, `quadratics.factoring`, `quadratics.solve` |
+| Percentages | `percentages.ofNumber`, `percentages.discount` |
+
+The same generator, settings and seed always give the same problem. The rendered text is stored too, so hand edits in the JSON are never overwritten unless you click Regenerate.
+
+To add a generator, create a module in `js/generators/` that exports an array of generators (see `arithmetic.js`: `id`, `name`, `category`, `paramSchema`, `generate(params, rng)`) and add it to the list in `js/generators/index.js`. The settings form is built from `paramSchema` (types `int`, `bool`, `select`). Also add a matching check in `tests/generator-checks.js`.
+
+## Tests
+
+```sh
+node tests/run.mjs
+```
+
+Runs every generator over 300 seeds and every setting variant (about 14,000 problems). Each answer is re-checked independently of the generator, every formula must render in KaTeX, and the same seed must give the same result.
 
 ## Writing math
 

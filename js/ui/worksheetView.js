@@ -3,6 +3,7 @@ import { getState, update, subscribe, setEditing } from '../state.js';
 import { renderInto } from '../render.js';
 import { t, tn } from '../strings.js';
 import { toast } from './toast.js';
+import { getGenerator, generate, newSeed } from '../generators/index.js';
 import { $, h } from './dom.js';
 
 export function initWorksheetView({ onLoadExample }) {
@@ -58,6 +59,31 @@ export function initWorksheetView({ onLoadExample }) {
     });
   }
 
+  function regenerate(id) {
+    const p = getState().worksheet.problems[indexOf(id)];
+    if (!p || !getGenerator(p.generator)) return;
+    if (p.edited && !window.confirm(t('confirm.regenerateEdited'))) return;
+    let fresh = null;
+    let seed = 0;
+    try {
+      for (let i = 0; i < 10; i++) { // try a few seeds so the new problem differs from the old one
+        seed = newSeed();
+        fresh = generate(p.generator, p.params, seed);
+        if (fresh.statement !== p.statement) break;
+      }
+    } catch {
+      toast(t('toast.regenerateFailed'));
+      return;
+    }
+    update((s) => {
+      const q = s.worksheet.problems.find((x) => x.id === id);
+      Object.assign(q, { params: fresh.params, seed, statement: fresh.statement, answer: fresh.answer, solution: fresh.solution });
+      delete q.edited;
+      if (s.editingId === id) s.editingId = null; // the open form would be out of date
+    });
+    list.querySelector(`[data-id="${id}"] [data-action="regenerate"]`)?.focus();
+  }
+
   function remove(id) {
     const index = indexOf(id);
     const removed = getState().worksheet.problems[index];
@@ -80,6 +106,7 @@ export function initWorksheetView({ onLoadExample }) {
       case 'down': move(id, 1, 'down'); break;
       case 'edit': setEditing(id); break;
       case 'duplicate': duplicate(id); break;
+      case 'regenerate': regenerate(id); break;
       case 'delete': remove(id); break;
     }
   });
@@ -161,6 +188,7 @@ export function initWorksheetView({ onLoadExample }) {
       tool('up', '↑', { title: t('problem.up'), 'aria-label': `${t('problem.up')}, ${label}` }),
       tool('down', '↓', { title: t('problem.down'), 'aria-label': `${t('problem.down')}, ${label}` }),
       tool('edit', t('problem.edit')),
+      p.type === 'generated' && getGenerator(p.generator) && tool('regenerate', t('problem.regenerate')),
       tool('duplicate', t('problem.duplicate')),
       tool('delete', t('problem.delete'), { class: 'btn small danger' }),
     );

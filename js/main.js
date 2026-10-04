@@ -4,6 +4,7 @@ import { newWorksheet } from './schema.js';
 import { downloadJson, parseWorksheetText, saveAutosave, loadAutosave, clearAutosave } from './storage.js';
 import { initWorksheetView } from './ui/worksheetView.js';
 import { initProblemEditor } from './ui/problemEditor.js';
+import { initGeneratorPanel } from './ui/generatorPanel.js';
 import { toast } from './ui/toast.js';
 import { $, h } from './ui/dom.js';
 
@@ -126,6 +127,7 @@ subscribe((kind, state) => {
 
 // ---- start
 initProblemEditor();
+initGeneratorPanel();
 initWorksheetView({ onLoadExample: loadExample });
 status.textContent = t('status.clean');
 

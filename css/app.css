@@ -91,6 +91,13 @@ textarea, input[type="text"], input[type="number"], select {
 }
 textarea { font-family: var(--mono); font-size: 14px; resize: vertical; }
 select { width: auto; }
+.field select { width: 100%; }
+.params { margin: 0 0 1rem; padding: 0.75rem; background: #fff; border: 1px solid var(--line); border-radius: 4px; }
+.params legend { padding: 0 0.35rem; font-size: 13px; font-weight: 600; }
+.params-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem 0.75rem; }
+.params-grid .field { margin-bottom: 0; }
+.params-grid .wide { grid-column: 1 / -1; }
+.params-grid .check { align-items: center; }
 .snippet-bar { display: flex; flex-wrap: wrap; gap: 0.25rem; margin-bottom: 0.35rem; }
 .snippet { min-width: 2rem; font-family: var(--mono); }
 .field-error { margin: 0.3rem 0 0; color: var(--danger); font-size: 13px; font-weight: 600; }
@@ -105,9 +112,6 @@ select { width: auto; }
 .preview-card { border: 1px solid var(--line); border-radius: 4px; padding: 0.75rem 1rem; font-size: 1.05rem; }
 .preview-body:empty::before { content: attr(data-empty); color: var(--muted); font-family: var(--ui); font-size: 14px; }
 .math-errors { margin: 0.5rem 0 0; padding-left: 1.1rem; color: var(--danger); font-size: 13px; }
-.placeholder { padding: 1rem; background: #fff; border: 1px dashed var(--line); border-radius: 4px; }
-.placeholder h2 { margin: 0 0 0.5rem; font-size: 1rem; }
-.placeholder p { margin: 0; color: var(--muted); }
 
 /* ---- the paper */
 .sheet-controls {
