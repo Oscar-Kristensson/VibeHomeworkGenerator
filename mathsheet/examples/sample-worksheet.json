@@ -1,0 +1,87 @@
+{
+  "schemaVersion": 1,
+  "meta": {
+    "title": "Homework Week 12",
+    "subject": "Algebra, grade 8",
+    "createdAt": "2026-10-04T10:00:00Z",
+    "updatedAt": "2026-10-04T10:00:00Z"
+  },
+  "settings": {
+    "showAnswers": false,
+    "showNameDateFields": true,
+    "numbering": "decimal"
+  },
+  "problems": [
+    {
+      "id": "p_01",
+      "type": "custom",
+      "statement": "Solve for $x$: $2x + 5 = 17$",
+      "answer": "$x = 6$",
+      "solution": "Subtract $5$ from both sides, then divide by $2$.",
+      "points": 2,
+      "tags": [
+        "linear",
+        "grade8"
+      ]
+    },
+    {
+      "id": "p_02",
+      "type": "custom",
+      "statement": "Simplify the fraction $\\dfrac{18}{24}$.",
+      "answer": "$\\dfrac{3}{4}$",
+      "solution": "Divide the numerator and the denominator by their greatest common divisor, $6$.",
+      "points": 1,
+      "tags": [
+        "fractions"
+      ]
+    },
+    {
+      "id": "p_03",
+      "type": "generated",
+      "generator": "linearEquations.twoStep",
+      "params": {
+        "min": 1,
+        "max": 10,
+        "maxCoefficient": 9,
+        "allowNegative": false
+      },
+      "seed": 482913,
+      "statement": "Solve for $x$: $2x - 7 = 11$",
+      "answer": "$x = 9$",
+      "solution": "Add $7$ to both sides: $2x = 11 + 7 = 18$. Divide both sides by $2$: $x = 18 \\div 2 = 9$.",
+      "points": 2,
+      "tags": [
+        "linear"
+      ]
+    },
+    {
+      "id": "p_04",
+      "type": "generated",
+      "generator": "quadratics.solve",
+      "params": {
+        "maxRoot": 6,
+        "allowNegative": true
+      },
+      "seed": 91724,
+      "statement": "Solve for $x$: $x^2 + x - 20 = 0$",
+      "answer": "$x = -5 \\text{ or } x = 4$",
+      "solution": "Factor the left side: $(x + 5)(x - 4) = 0$. A product is zero when one of its factors is zero, so $x = -5 \\text{ or } x = 4$.",
+      "points": 3,
+      "tags": [
+        "quadratics"
+      ]
+    },
+    {
+      "id": "p_05",
+      "type": "custom",
+      "statement": "A jacket costs \\$80. It is on sale for $25\\%$ off. What is the sale price?",
+      "answer": "\\$60",
+      "solution": "$80 \\times 0.75 = 60$.",
+      "points": 2,
+      "tags": [
+        "percent",
+        "word problem"
+      ]
+    }
+  ]
+}
