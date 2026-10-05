@@ -21,8 +21,19 @@ It also works unchanged on GitHub Pages or any static host.
 | 2. Custom problems with live preview, list with edit / reorder / delete | done |
 | 3. JSON save / open / validation / autosave | done |
 | 4. Generators: registry, auto-built settings form, 10 generators, regenerate | done |
-| 5. HTML export | next |
+| 5. HTML export: standalone file, answer key, print CSS | done |
 | 6. Polish (JSON editor, tests page, more generators) | planned |
+
+## Exporting
+
+**Export HTML** creates one self-contained file to email, upload to a learning platform or print. Math is pre-rendered, so the file contains no JavaScript.
+
+- **Answer key:** optional, with or without worked solutions, on its own page or straight after the problems. It follows the printed order and is always numbered.
+- **Content:** show or hide points, shuffle the problem order. Name and date lines and the numbering style come from the worksheet settings.
+- **Math fonts:** link them from a CDN (about 32 KB per file, math looks right only online) or embed them (about 370 KB, fully offline).
+- **Reopening later:** you can embed the worksheet JSON in the file. Open the HTML in Mathsheet with **Open** to continue editing. The data includes all answers, so leave it off for files you give to students.
+- **Preview** opens the file in a new tab. Printing uses page margins and keeps each problem on one page.
+- User text is always escaped. Only KaTeX output is inserted as HTML.
 
 ## Generators
 
@@ -45,7 +56,7 @@ To add a generator, create a module in `js/generators/` that exports an array of
 node tests/run.mjs
 ```
 
-Runs every generator over 300 seeds and every setting variant (about 14,000 problems). Each answer is re-checked independently of the generator, every formula must render in KaTeX, and the same seed must give the same result.
+Runs every generator over 300 seeds and every setting variant (about 14,000 problems). Each answer is re-checked independently of the generator, every formula must render in KaTeX, and the same seed must give the same result. It also checks the HTML export: escaping, the answer key, fonts, the embedded data, and that broken formulas degrade to plain text.
 
 ## Writing math
 
@@ -78,4 +89,4 @@ Runs every generator over 300 seeds and every setting variant (about 14,000 prob
 - `js/state.js` is the single source of truth. `js/schema.js` validates and migrates files. `js/storage.js` handles files and autosave.
 - `js/render.js` turns `$...$` text into KaTeX output without ever inserting user text as HTML.
 - `js/strings.js` holds every UI string, so translating means swapping one object.
-- `css/worksheet.css` is shared with the future export. `css/app.css` is editor-only.
+- `js/export/exportHtml.js` builds the export (pure functions, tested in Node). `css/worksheet.css` is shared by the editor and the export. `css/app.css` is editor-only.

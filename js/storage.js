@@ -16,18 +16,28 @@ export function fileNameFor(worksheet) {
   return `${slugify(worksheet.meta.title) || 'worksheet'}.json`;
 }
 
-export function downloadJson(worksheet) {
-  const name = fileNameFor(worksheet);
-  const blob = new Blob([JSON.stringify(worksheet, null, 2) + '\n'], { type: 'application/json' });
+export function downloadText(filename, text, type) {
+  const blob = new Blob([text], { type });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = name;
+  a.download = filename;
   document.body.append(a);
   a.click();
   a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+export function downloadJson(worksheet) {
+  const name = fileNameFor(worksheet);
+  downloadText(name, JSON.stringify(worksheet, null, 2) + '\n', 'application/json');
   return name;
+}
+
+/** Finds the worksheet JSON embedded in an exported HTML file, or null when there is none. */
+export function extractSourceFromHtml(html) {
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  return doc.getElementById('mathsheet-source')?.textContent ?? null;
 }
 
 /** Parses and validates JSON text. Returns { ok, errors, worksheet }. */

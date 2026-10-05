@@ -174,3 +174,15 @@ select { width: auto; }
 .toast-region { position: fixed; left: 50%; bottom: 1rem; transform: translateX(-50%); display: flex; flex-direction: column; gap: 0.5rem; align-items: center; z-index: 50; width: max-content; max-width: calc(100vw - 2rem); }
 .toast { display: flex; gap: 0.9rem; align-items: center; padding: 0.55rem 0.9rem; color: #fff; background: var(--ink); border-radius: 4px; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25); }
 .toast-action { font: inherit; font-weight: 600; color: var(--highlight); background: none; border: 0; padding: 0; cursor: pointer; text-decoration: underline; }
+
+/* ---- export dialog */
+.dialog { width: calc(100% - 2rem); max-width: 32rem; padding: 1.25rem 1.5rem; color: var(--ink); background: #fff; border: 1px solid var(--line); border-radius: 6px; }
+.dialog::backdrop { background: rgba(23, 32, 51, 0.45); }
+.dialog h2 { margin: 0 0 0.35rem; font-size: 1.15rem; }
+.opts { margin: 0 0 0.75rem; padding: 0.4rem 0.8rem 0.55rem; border: 1px solid var(--line); border-radius: 4px; }
+.opts legend { padding: 0 0.35rem; font-size: 13px; font-weight: 600; }
+.opts .check { display: flex; align-items: flex-start; gap: 0.5rem; margin: 0.3rem 0; font-weight: 400; font-size: 14px; }
+.opts .check input { margin-top: 0.2rem; }
+.opts .check.indent { margin-left: 1.5rem; }
+.opts .check input:disabled + span { color: var(--muted); }
+.opts small { display: block; color: var(--muted); font-size: 12.5px; }

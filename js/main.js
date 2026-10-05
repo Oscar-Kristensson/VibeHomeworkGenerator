@@ -1,10 +1,11 @@
 import { applyStrings, t, tn } from './strings.js';
 import { getState, subscribe, setWorksheet, markSaved } from './state.js';
 import { newWorksheet } from './schema.js';
-import { downloadJson, parseWorksheetText, saveAutosave, loadAutosave, clearAutosave } from './storage.js';
+import { downloadJson, parseWorksheetText, extractSourceFromHtml, saveAutosave, loadAutosave, clearAutosave } from './storage.js';
 import { initWorksheetView } from './ui/worksheetView.js';
 import { initProblemEditor } from './ui/problemEditor.js';
 import { initGeneratorPanel } from './ui/generatorPanel.js';
+import { initExportDialog } from './ui/exportDialog.js';
 import { toast } from './ui/toast.js';
 import { $, h } from './ui/dom.js';
 
@@ -47,7 +48,15 @@ function loadText(text) {
 
 async function openFile(file) {
   if (!file || !confirmDiscard()) return;
-  loadText(await file.text());
+  let text = await file.text();
+  if (/\.html?$/i.test(file.name)) { // an exported worksheet that carries its source data
+    text = extractSourceFromHtml(text);
+    if (text === null) {
+      showBanner({ kind: 'error', text: t('error.noSource'), actions: [{ label: t('banner.dismiss'), onClick: hideBanner }] });
+      return;
+    }
+  }
+  loadText(text);
 }
 
 async function loadExample() {
@@ -128,6 +137,7 @@ subscribe((kind, state) => {
 // ---- start
 initProblemEditor();
 initGeneratorPanel();
+initExportDialog();
 initWorksheetView({ onLoadExample: loadExample });
 status.textContent = t('status.clean');
 

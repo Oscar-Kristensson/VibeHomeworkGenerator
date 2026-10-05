@@ -63,3 +63,26 @@ export function renderInto(el, text) {
   }
   return errors;
 }
+
+export function escapeHtml(text) {
+  return String(text).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+/**
+ * Same as renderInto, but returns an HTML string (used by the export). Text is escaped; only KaTeX output is trusted.
+ * Formulas KaTeX cannot parse are shown as escaped plain text and reported through onError(message).
+ */
+export function renderToHtml(text, katex = window.katex, onError = () => {}) {
+  return splitMath(text ?? '').map((seg) => {
+    if (seg.type === 'text') return escapeHtml(seg.value);
+    const display = seg.type === 'display';
+    try {
+      const html = katex.renderToString(seg.value, { displayMode: display, throwOnError: true, strict: 'ignore', trust: false });
+      return `<span class="ws-math${display ? ' ws-math-display' : ''}">${html}</span>`;
+    } catch (err) {
+      onError(String(err.message || err).replace(/^KaTeX parse error:\s*/, ''));
+      const delim = display ? '$$' : '$';
+      return `<span class="math-error">${escapeHtml(delim + seg.value + delim)}</span>`;
+    }
+  }).join('');
+}

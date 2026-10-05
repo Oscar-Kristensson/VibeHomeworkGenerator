@@ -17,9 +17,9 @@
     <div class="file-actions">
       <button type="button" id="btn-new" class="btn" data-i18n="file.new"></button>
       <button type="button" id="btn-open" class="btn" data-i18n="file.open"></button>
-      <input type="file" id="file-input" accept=".json,application/json" hidden>
+      <input type="file" id="file-input" accept=".json,.html,application/json,text/html" hidden>
       <button type="button" id="btn-save" class="btn primary" data-i18n="file.save"></button>
-      <button type="button" id="btn-export" class="btn" disabled data-i18n="file.export" data-i18n-title="file.exportSoon"></button>
+      <button type="button" id="btn-export" class="btn" data-i18n="file.export"></button>
     </div>
   </header>
 
@@ -149,6 +149,44 @@
       </article>
     </section>
   </main>
+
+  <dialog id="export-dialog" class="dialog" aria-labelledby="export-title">
+    <form method="dialog" id="export-form" novalidate>
+      <h2 id="export-title" data-i18n="export.title"></h2>
+      <p class="hint" data-i18n="export.intro"></p>
+
+      <fieldset class="opts">
+        <legend data-i18n="export.key"></legend>
+        <label class="check"><input type="checkbox" id="x-key"><span data-i18n="export.includeKey"></span></label>
+        <label class="check indent"><input type="checkbox" id="x-solutions"><span data-i18n="export.includeSolutions"></span></label>
+        <label class="check indent"><input type="checkbox" id="x-newpage"><span data-i18n="export.newPage"></span></label>
+      </fieldset>
+
+      <fieldset class="opts">
+        <legend data-i18n="export.content"></legend>
+        <label class="check"><input type="checkbox" id="x-points"><span data-i18n="export.showPoints"></span></label>
+        <label class="check"><input type="checkbox" id="x-shuffle"><span data-i18n="export.shuffle"></span></label>
+      </fieldset>
+
+      <fieldset class="opts">
+        <legend data-i18n="export.fonts"></legend>
+        <label class="check"><input type="radio" name="x-fonts" id="x-fonts-cdn"><span><span data-i18n="export.fontsCdn"></span><small data-i18n="export.fontsCdnHint"></small></span></label>
+        <label class="check"><input type="radio" name="x-fonts" id="x-fonts-embed"><span><span data-i18n="export.fontsEmbed"></span><small data-i18n="export.fontsEmbedHint"></small></span></label>
+      </fieldset>
+
+      <fieldset class="opts">
+        <legend data-i18n="export.source"></legend>
+        <label class="check"><input type="checkbox" id="x-source"><span><span data-i18n="export.embedSource"></span><small data-i18n="export.embedSourceHint"></small></span></label>
+      </fieldset>
+
+      <p id="export-status" class="hint" role="status"></p>
+      <div class="form-actions">
+        <button type="button" id="x-download" class="btn primary" data-i18n="export.download"></button>
+        <button type="button" id="x-preview" class="btn" data-i18n="export.preview"></button>
+        <button type="button" id="x-close" class="btn" data-i18n="export.close"></button>
+      </div>
+    </form>
+  </dialog>
 
   <div id="toast-region" class="toast-region" role="status" aria-live="polite"></div>
 </body>
