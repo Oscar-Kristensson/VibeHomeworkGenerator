@@ -1,6 +1,8 @@
 // All user-facing text lives here so the UI can be translated by swapping this object.
 export const S = {
   'app.name': 'Mathsheet',
+  'app.lang': 'en',
+  'app.skip': 'Skip to the worksheet',
 
   'file.new': 'New',
   'file.open': 'Open',
@@ -29,6 +31,19 @@ export const S = {
   'form.snippets': 'Insert math',
   'form.statementRequired': 'Write the problem text first.',
   'form.mathError': 'Check the math: {msg}',
+
+  'json.edit': 'Edit JSON',
+  'json.back': 'Back to worksheet',
+  'json.title': 'Edit the worksheet as JSON',
+  'json.intro': 'Changes take effect when you click Apply, and only if the file passes validation. Generated problems keep their generator, settings and seed.',
+  'json.label': 'Worksheet JSON',
+  'json.unchanged': 'No changes yet.',
+  'json.valid': 'Valid. Ready to apply.',
+  'json.invalid': 'Cannot apply yet:',
+  'json.apply': 'Apply changes',
+  'json.revert': 'Revert',
+  'json.applied': 'JSON applied',
+  'confirm.discardJson': 'You have JSON edits that were not applied. Discard them?',
 
   'export.title': 'Export worksheet',
   'export.intro': 'Creates one HTML file to email, upload to a learning platform or print. It needs no JavaScript.',
@@ -71,6 +86,7 @@ export const S = {
   'sheet.name': 'Name',
   'sheet.date': 'Date',
   'sheet.problems': 'Problems',
+  'sheet.worksheet': 'Worksheet',
 
   'controls.showAnswers': 'Show answers here',
   'controls.nameDate': 'Name and date lines',
@@ -142,6 +158,7 @@ export function tn(key, n, vars = {}) {
 
 /** Fills elements marked with data-i18n, data-i18n-title, data-i18n-placeholder, data-i18n-label. */
 export function applyStrings(root = document) {
+  document.documentElement.lang = t('app.lang');
   root.querySelectorAll('[data-i18n]').forEach((el) => { el.textContent = t(el.dataset.i18n); });
   root.querySelectorAll('[data-i18n-title]').forEach((el) => { el.title = t(el.dataset.i18nTitle); });
   root.querySelectorAll('[data-i18n-placeholder]').forEach((el) => { el.placeholder = t(el.dataset.i18nPlaceholder); });

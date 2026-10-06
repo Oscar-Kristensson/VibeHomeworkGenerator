@@ -57,6 +57,7 @@ export function initWorksheetView({ onLoadExample }) {
       copy.id = `${copy.id}_c${Math.random().toString(36).slice(2, 5)}`;
       s.worksheet.problems.splice(from + 1, 0, copy);
     });
+    list.querySelector(`[data-id="${id}"] [data-action="duplicate"]`)?.focus();
   }
 
   function regenerate(id) {
@@ -91,6 +92,10 @@ export function initWorksheetView({ onLoadExample }) {
       s.worksheet.problems.splice(index, 1);
       if (s.editingId === id) s.editingId = null;
     });
+    // keyboard users keep their place: focus the next problem (or the previous one)
+    const rows = [...list.children];
+    (rows[index] ?? rows[index - 1])?.querySelector('[data-action="edit"]')?.focus();
+    if (rows.length === 0) $('#btn-example').focus();
     toast(t('toast.deleted'), {
       actionLabel: t('toast.undo'),
       onAction: () => update((s) => { s.worksheet.problems.splice(Math.min(index, s.worksheet.problems.length), 0, removed); }),

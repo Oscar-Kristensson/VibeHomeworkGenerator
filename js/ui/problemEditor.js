@@ -84,7 +84,7 @@ export function initProblemEditor() {
     previewTimer = setTimeout(renderPreview, 120);
   };
   Object.values(fields).forEach((f) => f.addEventListener('input', schedulePreview));
-  fields.statement.addEventListener('input', () => { statementError.hidden = true; });
+  fields.statement.addEventListener('input', () => { statementError.hidden = true; fields.statement.removeAttribute('aria-invalid'); });
 
   // ---- form <-> state
   const parseTags = (text) => [...new Set(text.split(',').map((s) => s.trim()).filter(Boolean))];
@@ -100,6 +100,7 @@ export function initProblemEditor() {
     cancelBtn.hidden = true;
     editingNote.hidden = true;
     statementError.hidden = true;
+    fields.statement.removeAttribute('aria-invalid');
     renderPreview();
   }
 
@@ -133,6 +134,7 @@ export function initProblemEditor() {
     if (!statement) {
       statementError.textContent = t('form.statementRequired');
       statementError.hidden = false;
+      fields.statement.setAttribute('aria-invalid', 'true');
       fields.statement.focus();
       return;
     }

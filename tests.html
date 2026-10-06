@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mathsheet tests</title>
+  <script defer src="vendor/katex/katex.min.js"></script>
+  <style>
+    body { margin: 0 auto; max-width: 52rem; padding: 1.5rem 1rem 3rem; font: 15px/1.5 system-ui, sans-serif; color: #172033; }
+    h1 { font-size: 1.4rem; margin: 0 0 0.25rem; }
+    h2 { font-size: 1.05rem; margin: 1.5rem 0 0.5rem; }
+    #summary { margin: 0.75rem 0; padding: 0.6rem 0.9rem; border: 2px solid #172033; border-radius: 4px; font-weight: 600; }
+    #summary.pass { border-color: #1b6e3c; color: #1b6e3c; }
+    #summary.fail { border-color: #b3261e; color: #b3261e; }
+    ul { list-style: none; margin: 0; padding: 0; }
+    li { padding: 0.15rem 0; }
+    li .mark { display: inline-block; width: 4.5rem; font-weight: 700; }
+    li.ok .mark { color: #1b6e3c; }
+    li.bad .mark { color: #b3261e; }
+    code { font-size: 13px; background: #eef1f5; padding: 0 0.25rem; border-radius: 3px; overflow-wrap: anywhere; }
+    p.note { color: #5b6678; margin: 0; }
+  </style>
+</head>
+<body>
+  <h1>Mathsheet tests</h1>
+  <p class="note">Runs in the browser, no tools needed. Add <code>?seeds=1000</code> to the address to test more seeds per generator (default 300).</p>
+  <div id="summary" role="status">Running…</div>
+  <div id="out"></div>
+
+  <script type="module">
+    import { generators } from './js/generators/index.js';
+    import { validateWorksheet } from './js/schema.js';
+    import { checkGenerators } from './tests/generator-checks.js';
+    import { checkExport } from './tests/export-checks.js';
+    import { runCoreChecks } from './tests/core-checks.js';
+    import { loadTestAssets } from './js/export/exportHtml.js';
+
+    const out = document.getElementById('out');
+    const summary = document.getElementById('summary');
+    const seeds = Number(new URLSearchParams(location.search).get('seeds')) || 300;
+    const pause = () => new Promise((resolve) => setTimeout(resolve));
+    let total = 0;
+    let failed = 0;
+
+    function section(title, rows) {
+      const h2 = document.createElement('h2');
+      h2.textContent = title;
+      const list = document.createElement('ul');
+      for (const row of rows) {
+        total += 1;
+        if (!row.ok) failed += 1;
+        const li = document.createElement('li');
+        li.className = row.ok ? 'ok' : 'bad';
+        const mark = document.createElement('span');
+        mark.className = 'mark';
+        mark.textContent = row.ok ? '✓ pass' : '✗ FAIL';
+        li.append(mark, document.createTextNode(row.name));
+        if (row.detail) { li.append(' '); const code = document.createElement('code'); code.textContent = row.detail; li.append(code); }
+        list.append(li);
+      }
+      out.append(h2, list);
+    }
+
+    try {
+      const sample = await (await fetch('examples/sample-worksheet.json')).json();
+      const katex = window.katex;
+
+      section('Core', runCoreChecks({ katex, sample }));
+      await pause();
+
+      const gen = checkGenerators(generators, { seeds, katex });
+      const byGenerator = generators.map((g) => {
+        const own = gen.failures.filter((f) => f.generator === g.id);
+        return { name: g.id, ok: own.length === 0, detail: own.length ? `${own.length} failures, first: seed ${own[0].seed}, ${own[0].problem}` : '' };
+      });
+      section(`Generators (${gen.checked.toLocaleString()} problems checked)`, byGenerator);
+      await pause();
+
+      const assets = await loadTestAssets();
+      const exp = checkExport(validateWorksheet(sample).worksheet, { katex, ...assets });
+      section('HTML export', exp.failures.length
+        ? exp.failures.map((name) => ({ name, ok: false }))
+        : [{ name: 'all export checks passed', ok: true }]);
+    } catch (err) {
+      section('Test run', [{ name: 'The tests could not run. Serve this folder with a web server.', ok: false, detail: String(err) }]);
+    }
+
+    summary.textContent = failed === 0 ? `All ${total} groups passed.` : `${failed} of ${total} failed.`;
+    summary.className = failed === 0 ? 'pass' : 'fail';
+  </script>
+</body>
+</html>

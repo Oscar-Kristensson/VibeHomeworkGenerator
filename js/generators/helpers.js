@@ -39,4 +39,19 @@ export function bounds(params) {
   return { lo, hi };
 }
 
+/** "x^3"; exponent 1 is dropped, exponents of 10 or more get braces: "x^{10}". */
+export const pow = (base, e) => (e === 1 ? String(base) : `${base}^${e >= 10 ? `{${e}}` : e}`);
+
+/** Formats [{c, d}] (coefficient, degree) as "3x^4 - x^2 + 5x - 7". Terms must be in descending degree and c != 0. */
+export function polynomial(terms, v = 'x') {
+  let out = '';
+  terms.forEach(({ c, d }, i) => {
+    const abs = Math.abs(c);
+    const body = d === 0 ? String(abs) : `${abs === 1 ? '' : abs}${pow(v, d)}`;
+    if (i === 0) out += (c < 0 ? '-' : '') + body;
+    else out += c < 0 ? ` - ${body}` : ` + ${body}`;
+  });
+  return out;
+}
+
 export const math = (tex) => `$${tex}$`;

@@ -103,7 +103,7 @@ ${items}
     : '';
 
   const html = `<!doctype html>
-<html lang="en">
+<html lang="${escapeHtml(t('app.lang'))}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -141,6 +141,12 @@ export function exportFileName(worksheet) {
 // ---- browser-only: fetching the CSS and fonts the export embeds ----
 
 let cached = null;
+
+/** For the test page: the raw stylesheet, worksheet CSS and base64 fonts. */
+export async function loadTestAssets() {
+  await loadAssets('embed');
+  return { rawKatexCss: cached.rawKatexCss, worksheetCss: cached.worksheetCss, fontData: cached.fontData };
+}
 
 async function fetchOk(url) {
   const response = await fetch(url);

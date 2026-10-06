@@ -4,6 +4,7 @@ import { generators } from '../js/generators/index.js';
 import { readFileSync } from 'node:fs';
 import { checkGenerators } from './generator-checks.js';
 import { checkExport } from './export-checks.js';
+import { runCoreChecks } from './core-checks.js';
 import { validateWorksheet } from '../js/schema.js';
 
 const require = createRequire(import.meta.url);
@@ -29,3 +30,9 @@ const sample = validateWorksheet(JSON.parse(read('examples/sample-worksheet.json
 const exp = checkExport(sample, { katex, rawKatexCss, worksheetCss: read('css/worksheet.css').toString('utf8'), fontData });
 console.log(`Export: ${exp.failures.length === 0 ? 'all checks passed' : exp.failures.length + ' failures'} (file size ${Math.round(exp.sizes.cdn / 1024)} KB with CDN fonts, ${Math.round(exp.sizes.embedded / 1024)} KB with embedded fonts).`);
 if (exp.failures.length) { exp.failures.forEach((f) => console.log('FAIL export: ' + f)); process.exit(1); }
+
+// ---- parsing, schema, parameters, helpers
+const core = runCoreChecks({ katex, sample: JSON.parse(read('examples/sample-worksheet.json')) });
+const coreFailed = core.filter((c) => !c.ok);
+console.log(`Core: ${core.length - coreFailed.length} of ${core.length} checks passed.`);
+if (coreFailed.length) { coreFailed.forEach((c) => console.log(`FAIL core: ${c.name} ${c.detail}`)); process.exit(1); }

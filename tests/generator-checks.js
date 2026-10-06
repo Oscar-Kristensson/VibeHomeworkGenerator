@@ -18,13 +18,65 @@ const reduced = ([n, d]) => gcd(n, d) === 1;
 /** Turns a tiny TeX polynomial / equation into JavaScript. */
 const toJs = (tex) => tex
   .replace(/\\dfrac\{([^}]*)\}\{([^}]*)\}/g, '(($1)/($2))')
-  .replace(/\\times/g, '*').replace(/\\div/g, '/')
+  .replace(/\\times|\\cdot/g, '*').replace(/\\div/g, '/')
   .replace(/(\d)\s*x/g, '$1*x')
   .replace(/\)\s*\(/g, ')*(')
   .replace(/\)\s*x/g, ')*x')
-  .replace(/\^2/g, '**2');
+  .replace(/\^\{?(\d+)\}?/g, '**$1')
+  .replace(/(x\*\*\d+)/g, '($1)'); // JavaScript rejects "-x**2" without parentheses
+
+const numbers = (text) => [...text.matchAll(/\$(\d+)\\text/g)].map((m) => Number(m[1]));
+const answerNumber = (r) => Number(firstMath(r.answer).match(/^(\d+)/)[1]);
 
 const SPECIFIC = {
+  'powers.evaluate'(r) {
+    const value = evalNum(toJs(firstMath(r.statement)));
+    return value === Number(firstMath(r.answer)) ? null : `wrong power: ${r.statement} -> ${r.answer}`;
+  },
+  'powers.roots'(r) {
+    const m = firstMath(r.statement).match(/^\\sqrt(\[3\])?\{(\d+)\}$/);
+    if (!m) return `unexpected root format: ${r.statement}`;
+    const k = m[1] ? 3 : 2;
+    const root = Number(firstMath(r.answer));
+    return root ** k === Number(m[2]) ? null : `${root}^${k} is not ${m[2]}`;
+  },
+  'powers.exponentLaws'(r) {
+    const v = firstMath(r.statement).match(/([xyan])\^/)?.[1];
+    // convert to JavaScript first (that removes "\dfrac"), then rename the variable to x
+    const rename = (tex) => toJs(tex).replace(new RegExp(v, 'g'), 'x');
+    const stmt = rename(firstMath(r.statement));
+    const ans = rename(firstMath(r.answer));
+    const x = 2; // powers of 2 are exact in floating point, so equal exponents give equal numbers
+    return new Function('x', `return ${stmt};`)(x) === new Function('x', `return ${ans};`)(x) ? null : `wrong simplification: ${r.statement} -> ${r.answer}`;
+  },
+  'geometry.rectangle'(r) {
+    const [l, w] = numbers(r.statement);
+    const area = /area/.test(r.statement);
+    const expected = area ? l * w : 2 * (l + w);
+    if (l === w) return 'rectangle is a square';
+    return answerNumber(r) === expected ? null : `wrong: ${r.statement} -> ${r.answer}`;
+  },
+  'geometry.triangle'(r) {
+    const [b, h] = numbers(r.statement);
+    return Number.isInteger((b * h) / 2) && answerNumber(r) === (b * h) / 2 ? null : `wrong: ${r.statement} -> ${r.answer}`;
+  },
+  'geometry.circle'(r) {
+    const [radius] = numbers(r.statement);
+    const expected = /area/.test(r.statement) ? radius * radius : 2 * radius;
+    return answerNumber(r) === expected && /\\pi/.test(r.answer) ? null : `wrong: ${r.statement} -> ${r.answer}`;
+  },
+  'derivatives.polynomial'(r) {
+    const f = toJs(mathParts(r.statement)[1].replace(/^f\(x\) = /, ''));
+    const d = toJs(firstMath(r.answer).replace(/^f'\(x\) = /, ''));
+    const F = new Function('x', `return ${f};`);
+    const D = new Function('x', `return ${d};`);
+    const h = 1e-4;
+    for (const x of [-2, -1, 0.5, 1, 2, 3]) {
+      const numeric = (F(x + h) - F(x - h)) / (2 * h);
+      if (Math.abs(numeric - D(x)) > 1e-3 * (1 + Math.abs(numeric))) return `derivative wrong at x=${x}: f=${f} f'=${d}`;
+    }
+    return null;
+  },
   'arithmetic.integers'(r, p) {
     const expr = firstMath(r.statement);
     const value = evalNum(toJs(expr));

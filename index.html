@@ -11,6 +11,7 @@
   <script type="module" src="js/main.js"></script>
 </head>
 <body>
+  <a class="skip-link" href="#worksheet" data-i18n="app.skip"></a>
   <header class="topbar">
     <h1 class="brand" data-i18n="app.name"></h1>
     <span id="save-status" class="save-status" role="status"></span>
@@ -19,6 +20,7 @@
       <button type="button" id="btn-open" class="btn" data-i18n="file.open"></button>
       <input type="file" id="file-input" accept=".json,.html,application/json,text/html" hidden>
       <button type="button" id="btn-save" class="btn primary" data-i18n="file.save"></button>
+      <button type="button" id="btn-json" class="btn" aria-pressed="false" data-i18n="json.edit"></button>
       <button type="button" id="btn-export" class="btn" data-i18n="file.export"></button>
     </div>
   </header>
@@ -26,7 +28,7 @@
   <div id="banner" class="banner" role="alert" hidden></div>
 
   <main class="layout">
-    <aside class="panel">
+    <aside class="panel" data-i18n-label="tab.list">
       <div class="tabs" role="tablist" data-i18n-label="tab.list">
         <button type="button" role="tab" id="tab-btn-custom" class="tab" aria-selected="true" aria-controls="tab-custom" data-i18n="tab.custom"></button>
         <button type="button" role="tab" id="tab-btn-generate" class="tab" aria-selected="false" tabindex="-1" aria-controls="tab-generate" data-i18n="tab.generate"></button>
@@ -114,7 +116,7 @@
       </section>
     </aside>
 
-    <section class="desk" aria-label="Worksheet">
+    <section class="desk" id="worksheet" tabindex="-1" data-i18n-label="sheet.worksheet">
       <div class="sheet-controls">
         <label class="check"><input type="checkbox" id="opt-answers"> <span data-i18n="controls.showAnswers"></span></label>
         <label class="check"><input type="checkbox" id="opt-fields"> <span data-i18n="controls.nameDate"></span></label>
@@ -147,6 +149,19 @@
           <button type="button" id="btn-example" class="btn" data-i18n="empty.example"></button>
         </div>
       </article>
+    </section>
+
+    <section id="json-view" class="desk json-desk" aria-labelledby="json-title" hidden>
+      <div class="json-wrap">
+        <h2 id="json-title" data-i18n="json.title"></h2>
+        <p class="hint" data-i18n="json.intro"></p>
+        <textarea id="json-text" class="json-text" spellcheck="false" autocomplete="off" data-i18n-label="json.label"></textarea>
+        <div id="json-status" class="json-status" role="status"></div>
+        <div class="form-actions">
+          <button type="button" id="json-apply" class="btn primary" data-i18n="json.apply"></button>
+          <button type="button" id="json-revert" class="btn" data-i18n="json.revert"></button>
+        </div>
+      </div>
     </section>
   </main>
 

@@ -5,6 +5,9 @@ import fractions from './fractions.js';
 import linearEquations from './linearEquations.js';
 import quadratics from './quadratics.js';
 import percentages from './percentages.js';
+import powers from './powers.js';
+import geometry from './geometry.js';
+import derivatives from './derivatives.js';
 import { createRng } from './rng.js';
 
 export { newSeed } from './rng.js';
@@ -15,6 +18,9 @@ export const generators = [
   ...linearEquations,
   ...quadratics,
   ...percentages,
+  ...powers,
+  ...geometry,
+  ...derivatives,
 ];
 
 const byId = new Map(generators.map((g) => [g.id, g]));

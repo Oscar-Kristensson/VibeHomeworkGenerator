@@ -6,6 +6,7 @@ import { initWorksheetView } from './ui/worksheetView.js';
 import { initProblemEditor } from './ui/problemEditor.js';
 import { initGeneratorPanel } from './ui/generatorPanel.js';
 import { initExportDialog } from './ui/exportDialog.js';
+import { initJsonEditor } from './ui/jsonEditor.js';
 import { toast } from './ui/toast.js';
 import { $, h } from './ui/dom.js';
 
@@ -138,6 +139,7 @@ subscribe((kind, state) => {
 initProblemEditor();
 initGeneratorPanel();
 initExportDialog();
+initJsonEditor();
 initWorksheetView({ onLoadExample: loadExample });
 status.textContent = t('status.clean');
 

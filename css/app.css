@@ -137,7 +137,7 @@ select { width: auto; }
 
 .ws-input { display: block; width: 100%; background: transparent; border: 0; border-bottom: 1px dashed transparent; border-radius: 0; padding: 0; }
 .ws-input:hover, .ws-input:focus { border-bottom-color: var(--line); }
-.ws-input::placeholder { color: #a3adbd; }
+.ws-input::placeholder { color: #657083; }
 
 .ws-problem { position: relative; padding: 0.15rem 0.5rem 0.15rem 0.25rem; margin-left: -0.25rem; border-radius: 3px; }
 .ws-problem.is-editing { background: rgba(255, 224, 102, 0.22); box-shadow: inset 4px 0 0 var(--highlight); }
@@ -186,3 +186,28 @@ select { width: auto; }
 .opts .check.indent { margin-left: 1.5rem; }
 .opts .check input:disabled + span { color: var(--muted); }
 .opts small { display: block; color: var(--muted); font-size: 12.5px; }
+
+/* ---- JSON editor */
+.layout.json-mode { grid-template-columns: 1fr; }
+.json-desk { padding: 1rem; }
+.json-wrap { max-width: 60rem; margin: 0 auto; }
+.json-wrap h2 { margin: 0 0 0.35rem; font-size: 1.15rem; }
+.json-text { height: min(65vh, 42rem); min-height: 16rem; font-size: 13px; line-height: 1.5; tab-size: 2; white-space: pre; overflow: auto; }
+.json-status { min-height: 1.5rem; margin-top: 0.5rem; font-size: 14px; }
+.json-status.is-valid { color: #1b6e3c; font-weight: 600; }
+.json-status.is-invalid { color: var(--danger); }
+.json-status p { margin: 0 0 0.25rem; font-weight: 600; }
+.json-status ul { margin: 0; padding-left: 1.2rem; }
+
+/* ---- accessibility */
+.skip-link { position: absolute; left: -999px; top: 0; }
+.skip-link:focus { left: 0.5rem; top: 0.5rem; z-index: 100; padding: 0.4rem 0.8rem; color: var(--ink); background: #fff; border: 2px solid var(--blue); border-radius: 4px; }
+.desk:focus { outline: none; }
+@media (pointer: coarse) {
+  .btn.small { min-height: 2.25rem; padding: 0.3rem 0.75rem; font-size: 14px; }
+  .snippet { min-width: 2.5rem; }
+}
+@media (forced-colors: active) {
+  .ws-problem.is-editing { outline: 2px solid Highlight; }
+  .sheet::before { background: CanvasText; }
+}
