@@ -1,4 +1,5 @@
 # Mathsheet
+*Note:*  This project is vibe coded
 
 A static website for building math homework. Write your own problems, keep everything in a JSON file, and (soon) auto-generate problems and export the worksheet as a standalone HTML page. Math is rendered with [KaTeX](https://katex.org/), vendored in `vendor/katex/` so it works offline.
 
