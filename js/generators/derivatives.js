@@ -11,7 +11,7 @@ export default [
       { key: 'maxCoefficient', label: 'Largest coefficient', type: 'int', default: 9, min: 1, max: 20 },
       { key: 'allowNegative', label: 'Allow negative coefficients', type: 'bool', default: true },
     ],
-    generate(params, rng) {
+    generate(params, rng, p) {
       const lead = rng.int(2, params.maxDegree);
       // the other degrees are drawn from 0..lead-1 without repeats
       const pool = Array.from({ length: lead }, (_, i) => i);
@@ -21,9 +21,9 @@ export default [
       const fPrime = f.filter((t) => t.d > 0).map(({ c, d }) => ({ c: c * d, d: d - 1 }));
       const result = polynomial(fPrime);
       return {
-        statement: `Find ${math("f'(x)")} for ${math(`f(x) = ${polynomial(f)}`)}.`,
+        statement: p('derivative', { fp: math("f'(x)"), f: math(`f(x) = ${polynomial(f)}`) }),
         answer: math(`f'(x) = ${result}`),
-        solution: `Use the power rule ${math('\\dfrac{d}{dx}x^n = nx^{n-1}')} on each term. A constant has derivative ${math('0')}. So ${math(`f'(x) = ${result}`)}.`,
+        solution: p('derivativeSolution', { rule: math('\\dfrac{d}{dx}x^n = nx^{n-1}'), zero: math('0'), eq: math(`f'(x) = ${result}`) }),
       };
     },
   },

@@ -1,4 +1,4 @@
-import { applyStrings, t, tn } from './strings.js';
+import { applyStrings, t, tn, LANGUAGES, getLanguage, setLanguage } from './strings.js';
 import { getState, subscribe, setWorksheet, markSaved } from './state.js';
 import { newWorksheet } from './schema.js';
 import { downloadJson, parseWorksheetText, extractSourceFromHtml, saveAutosave, loadAutosave, clearAutosave } from './storage.js';
@@ -11,6 +11,16 @@ import { toast } from './ui/toast.js';
 import { $, h } from './ui/dom.js';
 
 applyStrings();
+
+// ---- interface language (the page reloads so every string is redrawn; unsaved work is autosaved)
+const uiLang = $('#ui-lang');
+uiLang.append(...LANGUAGES.map((l) => h('option', { value: l.code, text: l.name })));
+uiLang.value = getLanguage();
+uiLang.addEventListener('change', () => {
+  setLanguage(uiLang.value);
+  const url = new URL(location.href);
+  if (url.searchParams.has('lang')) { url.searchParams.delete('lang'); location.assign(url); } else location.reload();
+});
 
 // ---- banner (restore prompt, file errors)
 const banner = $('#banner');
@@ -63,7 +73,8 @@ async function openFile(file) {
 async function loadExample() {
   if (!confirmDiscard()) return;
   try {
-    const response = await fetch('examples/sample-worksheet.json');
+    const file = getLanguage() === 'en' ? 'sample-worksheet.json' : `sample-worksheet.${getLanguage()}.json`;
+    const response = await fetch(`examples/${file}`);
     if (!response.ok) throw new Error(response.statusText);
     loadText(await response.text());
   } catch {

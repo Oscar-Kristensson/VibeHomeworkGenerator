@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "meta": {
-    "title": "Homework Week 12",
-    "subject": "Algebra, grade 8",
-    "language": "en",
+    "title": "Läxa vecka 12",
+    "subject": "Matematik, åk 8",
+    "language": "sv",
     "createdAt": "2026-10-04T10:00:00Z",
     "updatedAt": "2026-10-04T10:00:00Z"
   },
@@ -16,24 +16,24 @@
     {
       "id": "p_01",
       "type": "custom",
-      "statement": "Solve for $x$: $2x + 5 = 17$",
+      "statement": "Lös ekvationen $2x + 5 = 17$.",
       "answer": "$x = 6$",
-      "solution": "Subtract $5$ from both sides, then divide by $2$.",
+      "solution": "Subtrahera $5$ från båda led och dividera sedan med $2$.",
       "points": 2,
       "tags": [
-        "linear",
-        "grade8"
+        "ekvationer",
+        "åk8"
       ]
     },
     {
       "id": "p_02",
       "type": "custom",
-      "statement": "Simplify the fraction $\\dfrac{18}{24}$.",
+      "statement": "Förkorta bråket $\\dfrac{18}{24}$ så långt som möjligt.",
       "answer": "$\\dfrac{3}{4}$",
-      "solution": "Divide the numerator and the denominator by their greatest common divisor, $6$.",
+      "solution": "Dividera täljare och nämnare med deras största gemensamma delare, $6$.",
       "points": 1,
       "tags": [
-        "fractions"
+        "bråk"
       ]
     },
     {
@@ -47,12 +47,12 @@
         "allowNegative": false
       },
       "seed": 482913,
-      "statement": "Solve for $x$: $2x - 7 = 11$",
+      "statement": "Lös ekvationen $2x - 7 = 11$.",
       "answer": "$x = 9$",
-      "solution": "Add $7$ to both sides: $2x = 11 + 7 = 18$. Divide both sides by $2$: $x = 18 \\div 2 = 9$.",
+      "solution": "Addera $7$ till båda led: $2x = 11 + 7 = 18$. Dividera båda led med $2$: $x = 18 : 2 = 9$.",
       "points": 2,
       "tags": [
-        "linear"
+        "algebra"
       ]
     },
     {
@@ -64,24 +64,24 @@
         "allowNegative": true
       },
       "seed": 91724,
-      "statement": "Solve for $x$: $x^2 + x - 20 = 0$",
-      "answer": "$x = -5 \\text{ or } x = 4$",
-      "solution": "Factor the left side: $(x + 5)(x - 4) = 0$. A product is zero when one of its factors is zero, so $x = -5 \\text{ or } x = 4$.",
+      "statement": "Lös ekvationen $x^2 + x - 20 = 0$.",
+      "answer": "$x = -5 \\text{ eller } x = 4$",
+      "solution": "Faktorisera vänsterledet: $(x + 5)(x - 4) = 0$. En produkt är noll när någon faktor är noll, så $x = -5 \\text{ eller } x = 4$.",
       "points": 3,
       "tags": [
-        "quadratics"
+        "algebra"
       ]
     },
     {
       "id": "p_05",
       "type": "custom",
-      "statement": "A jacket costs \\$80. It is on sale for $25\\%$ off. What is the sale price?",
-      "answer": "\\$60",
-      "solution": "$80 \\times 0.75 = 60$.",
+      "statement": "En jacka kostar 800 kr. Den säljs med $25\\,\\%$ rabatt. Vad blir det nya priset?",
+      "answer": "600 kr",
+      "solution": "$800 \\cdot 0{,}75 = 600$.",
       "points": 2,
       "tags": [
-        "percent",
-        "word problem"
+        "procent",
+        "textuppgift"
       ]
     }
   ]

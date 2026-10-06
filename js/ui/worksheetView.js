@@ -1,7 +1,7 @@
 // The worksheet "paper": header fields, problem list, reorder / edit / duplicate / delete.
 import { getState, update, subscribe, setEditing } from '../state.js';
 import { renderInto } from '../render.js';
-import { t, tn } from '../strings.js';
+import { t, tn, LANGUAGES, isLanguage } from '../strings.js';
 import { toast } from './toast.js';
 import { getGenerator, generate, newSeed } from '../generators/index.js';
 import { $, h } from './dom.js';
@@ -16,6 +16,8 @@ export function initWorksheetView({ onLoadExample }) {
   const showFields = $('#opt-fields');
   const numbering = $('#opt-numbering');
   const total = $('#total-points');
+  const language = $('#opt-language');
+  language.append(...LANGUAGES.map((l) => h('option', { value: l.code, text: l.name })));
 
   $('#btn-example').addEventListener('click', onLoadExample);
 
@@ -24,6 +26,7 @@ export function initWorksheetView({ onLoadExample }) {
   subjectInput.addEventListener('input', () => update((s) => { s.worksheet.meta.subject = subjectInput.value; }, { render: false }));
   showAnswers.addEventListener('change', () => update((s) => { s.worksheet.settings.showAnswers = showAnswers.checked; }));
   showFields.addEventListener('change', () => update((s) => { s.worksheet.settings.showNameDateFields = showFields.checked; }));
+  language.addEventListener('change', () => { if (isLanguage(language.value)) update((s) => { s.worksheet.meta.language = language.value; }); });
   numbering.addEventListener('change', () => update((s) => { s.worksheet.settings.numbering = numbering.value; }));
 
   // ---- actions
@@ -69,7 +72,7 @@ export function initWorksheetView({ onLoadExample }) {
     try {
       for (let i = 0; i < 10; i++) { // try a few seeds so the new problem differs from the old one
         seed = newSeed();
-        fresh = generate(p.generator, p.params, seed);
+        fresh = generate(p.generator, p.params, seed, getState().worksheet.meta.language);
         if (fresh.statement !== p.statement) break;
       }
     } catch {
@@ -213,6 +216,7 @@ export function initWorksheetView({ onLoadExample }) {
     showAnswers.checked = settings.showAnswers;
     showFields.checked = settings.showNameDateFields;
     numbering.value = settings.numbering;
+    language.value = meta.language;
     fieldsRow.hidden = !settings.showNameDateFields;
     list.dataset.numbering = settings.numbering;
 

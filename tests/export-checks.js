@@ -74,5 +74,16 @@ export function checkExport(worksheet, { katex, rawKatexCss, worksheetCss, fontD
   const result = build({}, broken);
   check(result.mathErrors.length === 1 && result.html.includes('class="math-error"'), 'broken formula shown as plain text');
 
+  // Swedish worksheet: labels and page language follow meta.language
+  const swedish = JSON.parse(JSON.stringify(worksheet));
+  swedish.meta.language = 'sv';
+  const svHtml = build({ includeAnswerKey: true, includeSolutions: true }, swedish).html;
+  check(svHtml.includes('<html lang="sv">'), 'Swedish export declares lang="sv"');
+  check(svHtml.includes('>Namn<') && svHtml.includes('>Datum<') && svHtml.includes('>Facit<'), 'Swedish labels for name, date and answer key');
+  check(svHtml.includes('<strong>Lösning:</strong>'), 'Swedish label for solutions');
+  check(/\d+ p<\/span>/.test(svHtml) && /poäng totalt/.test(svHtml), 'Swedish points and total');
+  check(!svHtml.includes('>Name<') && !svHtml.includes('Answer key</h2>'), 'no English labels left in the Swedish export');
+  check(build({}).html.includes('<html lang="en">') && build({}).html.includes('>Name<'), 'English export unchanged');
+
   return { failures, sizes: { cdn: build({}).html.length, embedded: embedded.length } };
 }

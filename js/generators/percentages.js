@@ -1,7 +1,7 @@
 import { gcd, math } from './helpers.js';
 
 /** Smallest base that makes "p% of base" a whole number. */
-const baseStep = (p) => 100 / gcd(p, 100);
+const baseStep = (pct) => 100 / gcd(pct, 100);
 
 export default [
   {
@@ -11,15 +11,15 @@ export default [
     paramSchema: [
       { key: 'maxBase', label: 'Largest number', type: 'int', default: 200, min: 20, max: 10000 },
     ],
-    generate(params, rng) {
-      const p = rng.pick([5, 10, 15, 20, 25, 30, 40, 50, 60, 75, 80]);
-      const step = baseStep(p);
+    generate(params, rng, p) {
+      const pct = rng.pick([5, 10, 15, 20, 25, 30, 40, 50, 60, 75, 80]);
+      const step = baseStep(pct);
       const base = step * rng.int(1, Math.max(1, Math.floor(params.maxBase / step)));
-      const result = (p * base) / 100;
+      const result = (pct * base) / 100;
       return {
-        statement: `What is ${math(`${p}\\%`)} of ${math(String(base))}?`,
+        statement: p('pctOf', { pct: math(p.pct(pct)), base: math(String(base)) }),
         answer: math(String(result)),
-        solution: math(`${p}\\% \\text{ of } ${base} = \\dfrac{${p}}{100} \\times ${base} = ${result}`) + '.',
+        solution: math(`${p.pct(pct)} \\text{ ${p.of} } ${base} = \\dfrac{${pct}}{100} ${p.times} ${base} = ${result}`) + '.',
       };
     },
   },
@@ -30,16 +30,19 @@ export default [
     paramSchema: [
       { key: 'maxPrice', label: 'Highest price', type: 'int', default: 200, min: 20, max: 10000 },
     ],
-    generate(params, rng) {
-      const p = rng.pick([10, 15, 20, 25, 30, 40, 50]);
-      const step = baseStep(p);
+    generate(params, rng, p) {
+      const pct = rng.pick([10, 15, 20, 25, 30, 40, 50]);
+      const step = baseStep(pct);
       const price = step * rng.int(1, Math.max(1, Math.floor(params.maxPrice / step)));
-      const discount = (p * price) / 100;
+      const discount = (pct * price) / 100;
       const sale = price - discount;
       return {
-        statement: `An item costs \\$${price}. It is on sale for ${math(`${p}\\%`)} off. What is the sale price?`,
-        answer: `\\$${sale}`,
-        solution: `The discount is ${math(`${p}\\% \\times ${price} = ${discount}`)}, so the sale price is ${math(`${price} - ${discount} = ${sale}`)}.`,
+        statement: p('discount', { price: p.money(price), pct: math(p.pct(pct)) }),
+        answer: p.money(sale),
+        solution: p('discountSolution', {
+          disc: math(`${p.pct(pct)} ${p.times} ${price} = ${discount}`),
+          sale: math(`${price} - ${discount} = ${sale}`),
+        }),
       };
     },
   },

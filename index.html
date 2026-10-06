@@ -15,6 +15,7 @@
   <header class="topbar">
     <h1 class="brand" data-i18n="app.name"></h1>
     <span id="save-status" class="save-status" role="status"></span>
+    <label class="select lang-select"><span class="sr-only" data-i18n="app.language"></span><select id="ui-lang"></select></label>
     <div class="file-actions">
       <button type="button" id="btn-new" class="btn" data-i18n="file.new"></button>
       <button type="button" id="btn-open" class="btn" data-i18n="file.open"></button>
@@ -127,6 +128,9 @@
             <option value="roman" data-i18n="numbering.roman"></option>
             <option value="none" data-i18n="numbering.none"></option>
           </select>
+        </label>
+        <label class="select" data-i18n-title="controls.languageHint"><span data-i18n="controls.language"></span>
+          <select id="opt-language"></select>
         </label>
         <span id="total-points" class="total-points"></span>
       </div>

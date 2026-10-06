@@ -1,6 +1,6 @@
 import { bounds, paren, linear, withConstant, math } from './helpers.js';
 
-const solveFor = (eq) => `Solve for ${math('x')}: ${math(eq)}`;
+const solveFor = (p, eq) => p('solveFor', { x: math('x'), eq: math(eq) });
 
 export default [
   {
@@ -12,7 +12,7 @@ export default [
       { key: 'max', label: 'Largest number', type: 'int', default: 12, min: 1, max: 1000 },
       { key: 'allowNegative', label: 'Allow negative numbers', type: 'bool', default: false },
     ],
-    generate(params, rng) {
+    generate(params, rng, p) {
       const { lo, hi } = bounds(params);
       const neg = params.allowNegative;
       const pick = () => rng.int(lo, hi) * (neg ? rng.sign() : 1);
@@ -26,31 +26,31 @@ export default [
           const c = x + b;
           eq = `${withConstant('x', b)} = ${c}`;
           step = b > 0
-            ? `Subtract ${math(String(b))} from both sides: ${math(`x = ${c} - ${b} = ${x}`)}.`
-            : `Add ${math(String(-b))} to both sides: ${math(`x = ${c} + ${-b} = ${x}`)}.`;
+            ? p('stepSubtract', { n: math(String(b)), eq: math(`x = ${c} - ${b} = ${x}`) })
+            : p('stepAdd', { n: math(String(-b)), eq: math(`x = ${c} + ${-b} = ${x}`) });
           if (c === 0 && attempt < 100) continue;
         } else if (type === 'subtract') {
           const b = rng.int(lo, hi);
           const c = pick();
           x = c + b;
           eq = `x - ${b} = ${c}`;
-          step = `Add ${math(String(b))} to both sides: ${math(`x = ${c} + ${b} = ${x}`)}.`;
+          step = p('stepAdd', { n: math(String(b)), eq: math(`x = ${c} + ${b} = ${x}`) });
           if (x === 0 && attempt < 100) continue;
         } else if (type === 'multiply') {
           const al = Math.max(2, lo);
           const a = rng.int(al, Math.max(al, hi)) * (neg ? rng.sign() : 1);
           x = pick();
           eq = `${linear(a)} = ${a * x}`;
-          step = `Divide both sides by ${math(String(a))}: ${math(`x = ${a * x} \\div ${paren(a)} = ${x}`)}.`;
+          step = p('stepDivide', { n: math(String(a)), eq: math(`x = ${a * x} ${p.div} ${paren(a)} = ${x}`) });
         } else {
           const al = Math.max(2, lo);
           const a = rng.int(al, Math.max(al, hi));
           const c = pick();
           x = a * c;
           eq = `\\dfrac{x}{${a}} = ${c}`;
-          step = `Multiply both sides by ${math(String(a))}: ${math(`x = ${c} \\times ${a} = ${x}`)}.`;
+          step = p('stepMultiply', { n: math(String(a)), eq: math(`x = ${c} ${p.times} ${a} = ${x}`) });
         }
-        return { statement: `${solveFor(eq)}`, answer: math(`x = ${x}`), solution: step };
+        return { statement: solveFor(p, eq), answer: math(`x = ${x}`), solution: step };
       }
     },
   },
@@ -64,7 +64,7 @@ export default [
       { key: 'maxCoefficient', label: 'Largest coefficient', type: 'int', default: 9, min: 2, max: 20 },
       { key: 'allowNegative', label: 'Allow negative answers and coefficients', type: 'bool', default: false },
     ],
-    generate(params, rng) {
+    generate(params, rng, p) {
       const { lo, hi } = bounds(params);
       const neg = params.allowNegative;
       for (let attempt = 0; ; attempt++) {
@@ -75,11 +75,11 @@ export default [
         if ((c === 0 || (!neg && c < 0)) && attempt < 200) continue;
 
         const first = b > 0
-          ? `Subtract ${math(String(b))} from both sides: ${math(`${linear(a)} = ${c} - ${b} = ${c - b}`)}.`
-          : `Add ${math(String(-b))} to both sides: ${math(`${linear(a)} = ${c} + ${-b} = ${c - b}`)}.`;
-        const second = `Divide both sides by ${math(String(a))}: ${math(`x = ${c - b} \\div ${paren(a)} = ${x}`)}.`;
+          ? p('stepSubtract', { n: math(String(b)), eq: math(`${linear(a)} = ${c} - ${b} = ${c - b}`) })
+          : p('stepAdd', { n: math(String(-b)), eq: math(`${linear(a)} = ${c} + ${-b} = ${c - b}`) });
+        const second = p('stepDivide', { n: math(String(a)), eq: math(`x = ${c - b} ${p.div} ${paren(a)} = ${x}`) });
         return {
-          statement: solveFor(`${withConstant(linear(a), b)} = ${c}`),
+          statement: solveFor(p, `${withConstant(linear(a), b)} = ${c}`),
           answer: math(`x = ${x}`),
           solution: `${first} ${second}`,
         };

@@ -5,9 +5,12 @@ import { slugify, parseWorksheetText } from '../js/storage.js';
 import { createRng } from '../js/generators/rng.js';
 import { generators, getGenerator, normalizeParams, defaultParams, categories } from '../js/generators/index.js';
 import { polynomial, pow, withConstant, linear } from '../js/generators/helpers.js';
+import { S, sv, t, tn, LANGUAGES } from './strings-for-tests.js';
+import { missingTranslations, categoryName, generatorName, paramLabel } from '../js/generators/i18n.js';
+import { BOOKS } from '../js/generators/phrases.js';
 
 /** Returns [{ name, ok, detail }]. */
-export function runCoreChecks({ katex, sample }) {
+export function runCoreChecks({ katex, sample, svSample = null }) {
   const results = [];
   const check = (name, cond, detail = '') => results.push({ name, ok: Boolean(cond), detail: cond ? '' : String(detail) });
   const types = (text) => splitMath(text).map((s) => s.type).join(',');
@@ -69,6 +72,30 @@ export function runCoreChecks({ katex, sample }) {
   check('helpers: no "1x" and no "+ -"', linear(1) === 'x' && linear(-1) === '-x' && withConstant('x', -3) === 'x - 3' && withConstant('x', 3) === 'x + 3');
   check('helpers: polynomial formatting', polynomial([{ c: 3, d: 4 }, { c: -1, d: 2 }, { c: 5, d: 1 }, { c: -7, d: 0 }]) === '3x^4 - x^2 + 5x - 7');
   check('helpers: pow drops exponent 1 and braces big exponents', pow('x', 1) === 'x' && pow('x', 12) === 'x^{12}' && pow('x', 3) === 'x^3');
+
+  // ---- languages
+  const placeholders = (text) => [...text.matchAll(/\{(\w+)\}/g)].map((m) => m[1]).sort().join();
+  const enKeys = Object.keys(S);
+  check('every English UI string has a Swedish one', enKeys.every((k) => k in sv), enKeys.filter((k) => !(k in sv)).join(', '));
+  check('Swedish has no stray keys', Object.keys(sv).every((k) => k in S), Object.keys(sv).filter((k) => !(k in S)).join(', '));
+  check('Swedish strings keep the same {placeholders}', enKeys.every((k) => !(k in sv) || placeholders(S[k]) === placeholders(sv[k])), enKeys.filter((k) => k in sv && placeholders(S[k]) !== placeholders(sv[k])).join(', '));
+  check('t() uses the requested language and falls back to English', t('file.save', {}, 'sv') === 'Spara JSON' && t('file.save', {}, 'en') === 'Save JSON' && t('no.such.key', {}, 'sv') === 'no.such.key');
+  check('tn() picks singular and plural', tn('count.problem', 1, {}, 'sv') === '1 uppgift' && tn('count.problem', 3, {}, 'sv') === '3 uppgifter');
+  check('page language is declared for every language', LANGUAGES.every((l) => t('app.lang', {}, l.code) === l.code));
+  check('generator names, labels and options are translated', missingTranslations(generators, 'sv').length === 0, missingTranslations(generators, 'sv').join('; '));
+  check('English names are unchanged', generatorName(generators[0], 'en') === generators[0].name && categoryName('Algebra', 'en') === 'Algebra' && paramLabel(generators[0], generators[0].paramSchema[1], 'en') === generators[0].paramSchema[1].label);
+  const enPhrases = Object.keys(BOOKS.en.text);
+  // a translation may leave a placeholder out (Swedish says "Lös ekvationen {eq}" without {x}) but must not invent one
+  const subset = (a, b) => placeholders(a).split(',').filter(Boolean).every((name) => placeholders(b).split(',').includes(name));
+  check('every generator phrase exists in Swedish and only uses known {placeholders}', enPhrases.every((k) => k in BOOKS.sv.text && subset(BOOKS.sv.text[k], BOOKS.en.text[k])), enPhrases.filter((k) => !(k in BOOKS.sv.text) || !subset(BOOKS.sv.text[k], BOOKS.en.text[k])).join(', '));
+  check('Swedish phrase book has no stray keys', Object.keys(BOOKS.sv.text).every((k) => k in BOOKS.en.text));
+  check('old files without a language are English', validateWorksheet({ problems: [{ statement: 'x' }] }).worksheet.meta.language === 'en');
+  check('worksheet language is validated', validateWorksheet({ meta: { language: 'xx' }, problems: [] }).errors.some((e) => e.includes('meta.language')) && validateWorksheet({ meta: { language: 'sv' }, problems: [] }).worksheet.meta.language === 'sv');
+  check('new worksheets store a language', newWorksheet('sv').meta.language === 'sv' && newWorksheet().meta.language === 'en');
+  if (svSample) {
+    const v = validateWorksheet(svSample);
+    check('Swedish sample validates and is Swedish', v.ok && v.worksheet.meta.language === 'sv', v.errors.join('; '));
+  }
 
   return results;
 }

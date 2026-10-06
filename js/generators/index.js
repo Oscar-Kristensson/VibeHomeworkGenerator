@@ -9,6 +9,7 @@ import powers from './powers.js';
 import geometry from './geometry.js';
 import derivatives from './derivatives.js';
 import { createRng } from './rng.js';
+import { phraseBook } from './phrases.js';
 
 export { newSeed } from './rng.js';
 
@@ -63,11 +64,11 @@ export function normalizeParams(gen, params = {}) {
   return out;
 }
 
-/** Same generator + params + seed always gives the same result. */
-export function generate(id, params, seed) {
+/** Same generator + params + seed + language always gives the same result. */
+export function generate(id, params, seed, lang = 'en') {
   const gen = getGenerator(id);
   if (!gen) throw new Error(`Unknown generator: ${id}`);
   const normalized = normalizeParams(gen, params);
-  const result = gen.generate(normalized, createRng(seed));
+  const result = gen.generate(normalized, createRng(seed), phraseBook(lang));
   return { params: normalized, ...result };
 }

@@ -2,6 +2,7 @@
 import { getState, update } from '../state.js';
 import { uid } from '../schema.js';
 import { categories, getGenerator, defaultParams, normalizeParams, generate, newSeed } from '../generators/index.js';
+import { categoryName, generatorName, paramLabel, optionLabel } from '../generators/i18n.js';
 import { t, tn } from '../strings.js';
 import { toast } from './toast.js';
 import { $, h } from './dom.js';
@@ -20,8 +21,8 @@ export function initGeneratorPanel() {
   let current = null;
 
   for (const group of categories()) {
-    select.append(h('optgroup', { label: group.name },
-      group.generators.map((g) => h('option', { value: g.id, text: g.name }))));
+    select.append(h('optgroup', { label: categoryName(group.name) },
+      group.generators.map((g) => h('option', { value: g.id, text: generatorName(g) }))));
   }
 
   const input = (key) => paramsBox.querySelector(`[data-key="${key}"]`);
@@ -33,16 +34,16 @@ export function initGeneratorPanel() {
       if (spec.type === 'bool') {
         const box = h('input', { type: 'checkbox', id, dataset: { key: spec.key } });
         box.checked = Boolean(values[spec.key]);
-        return h('label', { class: 'check wide', for: id }, box, h('span', { text: spec.label }));
+        return h('label', { class: 'check wide', for: id }, box, h('span', { text: paramLabel(gen, spec) }));
       }
       if (spec.type === 'select') {
         const sel = h('select', { id, dataset: { key: spec.key } },
-          spec.options.map((o) => h('option', { value: o.value, text: o.label })));
+          spec.options.map((o) => h('option', { value: o.value, text: optionLabel(gen, spec, o) })));
         sel.value = values[spec.key];
-        return h('div', { class: 'field wide' }, h('label', { for: id, text: spec.label }), sel);
+        return h('div', { class: 'field wide' }, h('label', { for: id, text: paramLabel(gen, spec) }), sel);
       }
       return h('div', { class: 'field' },
-        h('label', { for: id, text: spec.label }),
+        h('label', { for: id, text: paramLabel(gen, spec) }),
         h('input', { type: 'number', id, step: 1, min: spec.min, max: spec.max, value: values[spec.key], inputmode: 'numeric', dataset: { key: spec.key } }));
     }));
   }
@@ -83,17 +84,18 @@ export function initGeneratorPanel() {
     const pointsEach = pointsInput.value.trim() !== '' && Number.isFinite(points) && points >= 0 ? points : 1;
 
     // Skip statements that are already on the worksheet or already in this batch.
+    const lang = getState().worksheet.meta.language; // wording of the generated text
     const seen = new Set(getState().worksheet.problems.map((p) => p.statement));
     const made = [];
     for (let attempts = 0; made.length < count && attempts < count * 30; attempts++) {
       const seed = newSeed();
-      const r = generate(gen.id, params, seed);
+      const r = generate(gen.id, params, seed, lang);
       if (seen.has(r.statement)) continue;
       seen.add(r.statement);
       made.push({
         id: uid(), type: 'generated', generator: gen.id, params: r.params, seed,
         statement: r.statement, answer: r.answer, solution: r.solution,
-        points: pointsEach, tags: [gen.category.toLowerCase()],
+        points: pointsEach, tags: [categoryName(gen.category, lang).toLowerCase()],
       });
     }
 

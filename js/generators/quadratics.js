@@ -23,12 +23,15 @@ export default [
     name: 'Factor a quadratic',
     category: 'Algebra',
     paramSchema,
-    generate(params, rng) {
+    generate(params, rng, p) {
       const { r1, r2, b, c, poly, factored } = makeQuadratic(params, rng);
       return {
-        statement: `Factor ${math(poly)}.`,
+        statement: p('factor', { poly: math(poly) }),
         answer: math(factored),
-        solution: `Look for two numbers with product ${math(String(c))} and sum ${math(String(b))}. They are ${math(String(-r1))} and ${math(String(-r2))}, so ${math(`${poly} = ${factored}`)}.`,
+        solution: p('factorSolution', {
+          c: math(String(c)), b: math(String(b)), m: math(String(-r1)), n: math(String(-r2)),
+          eq: math(`${poly} = ${factored}`),
+        }),
       };
     },
   },
@@ -37,13 +40,13 @@ export default [
     name: 'Solve a quadratic by factoring',
     category: 'Algebra',
     paramSchema,
-    generate(params, rng) {
+    generate(params, rng, p) {
       const { r1, r2, poly, factored } = makeQuadratic(params, rng);
-      const answer = r1 === r2 ? `x = ${r1}` : `x = ${r1} \\text{ or } x = ${r2}`;
+      const answer = r1 === r2 ? `x = ${r1}` : `x = ${r1} \\text{ ${p.or} } x = ${r2}`;
       return {
-        statement: `Solve for ${math('x')}: ${math(`${poly} = 0`)}`,
+        statement: p('solveFor', { x: math('x'), eq: math(`${poly} = 0`) }),
         answer: math(answer),
-        solution: `Factor the left side: ${math(`${factored} = 0`)}. A product is zero when one of its factors is zero, so ${math(answer)}.`,
+        solution: p('quadSolution', { eq: math(`${factored} = 0`), ans: math(answer) }),
       };
     },
   },

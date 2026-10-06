@@ -1,4 +1,4 @@
-# VibeHomeworkGenerator
+# Mathsheet
 
 A static website for building math homework. Write your own problems, keep everything in a JSON file, and (soon) auto-generate problems and export the worksheet as a standalone HTML page. Math is rendered with [KaTeX](https://katex.org/), vendored in `vendor/katex/` so it works offline.
 
@@ -23,6 +23,7 @@ It also works unchanged on GitHub Pages or any static host.
 | 4. Generators: registry, auto-built settings form, 10 generators, regenerate | done |
 | 5. HTML export: standalone file, answer key, print CSS | done |
 | 6. Polish: 17 generators, JSON editor, tests page, accessibility pass | done |
+| Extra: Swedish interface, generated problems and export | done |
 
 ## Exporting
 
@@ -65,7 +66,7 @@ Open `tests.html` through the web server (for example `http://localhost:8000/tes
 node tests/run.mjs
 ```
 
-Both run every generator over 300 seeds and every setting variant (about 14,000 problems). Each answer is re-checked independently of the generator, every formula must render in KaTeX, and the same seed must give the same result. It also checks the HTML export: escaping, the answer key, fonts, the embedded data, and that broken formulas degrade to plain text.
+Both run every generator in both languages over 300 seeds and every setting variant (about 58,000 problems). Each answer is re-checked independently of the generator, every formula must render in KaTeX, and the same seed must give the same result. It also checks the HTML export: escaping, the answer key, fonts, the embedded data, and that broken formulas degrade to plain text.
 
 ## Accessibility
 
@@ -75,13 +76,26 @@ Both run every generator over 300 seeds and every setting variant (about 14,000 
 - Errors are announced and marked (`aria-invalid`), status messages use live regions, and the interface does not rely on colour alone.
 - Larger touch targets on touch screens, no animation when reduced motion is requested, and forced-colors support.
 
-## Translating
+## Languages
 
-Every interface string is in `js/strings.js`, including the page language (`app.lang`). The wording of generated problems (for example "Solve for x") is written inside each generator and is still English.
+The app is available in **English** and **Svenska**.
+
+- **Interface language:** pick it in the top bar. It defaults to your browser language and is remembered. The page reloads to redraw everything, and unsaved work is autosaved. You can also use `?lang=sv` in the address.
+- **Worksheet language:** set above the worksheet and stored in the file as `meta.language`. It controls the wording and notation of *generated* problems, and the labels in exported files (Name, Date, Answer key, Solution, points, the page language). A new worksheet starts in the interface language. Files without the field are treated as English.
+- **Changing the worksheet language** does not rewrite problems that already exist. Use **Regenerate** on a generated problem to get it in the new language. Custom problems are always yours to write.
+- **Swedish notation:** multiplication uses `·`, division uses `:`, percent is written `25 %`, prices are written `80 kr`, and units use `tum` and `fot`.
+- An example worksheet in each language is in `examples/`. **Load example worksheet** opens the one for the interface language.
+
+### Adding another language
+
+1. Interface: copy `js/strings.sv.js` to `js/strings.<code>.js`, translate the values, and register it in `js/strings.js` (`DICTS` and `LANGUAGES`). Missing keys fall back to English.
+2. Generated problems: add an entry to `BOOKS` in `js/generators/phrases.js` (wording, the notation symbols, units, money format).
+3. Names in the Generate tab: add a table to `js/generators/i18n.js`.
+4. Run `node tests/run.mjs`. It reports missing keys, placeholders that do not match, untranslated generator names, and checks that every generator still produces correct math in each language.
 
 ## Hosting
 
-Push the folder to GitHub Pages is included. No build step.
+Push the folder to GitHub Pages or any static host. `.nojekyll` is included. No build step.
 
 KaTeX 0.16.11 is bundled in `vendor/katex/` under its MIT licence (see `vendor/katex/LICENSE`).
 
@@ -96,7 +110,7 @@ KaTeX 0.16.11 is bundled in `vendor/katex/` under its MIT licence (see `vendor/k
 ```json
 {
   "schemaVersion": 1,
-  "meta": { "title": "...", "subject": "...", "createdAt": "...", "updatedAt": "..." },
+  "meta": { "title": "...", "subject": "...", "language": "en", "createdAt": "...", "updatedAt": "..." },
   "settings": { "showAnswers": false, "showNameDateFields": true, "numbering": "decimal" },
   "problems": [
     { "id": "p_01", "type": "custom", "statement": "...", "answer": "...", "solution": "...", "points": 2, "tags": [] },
@@ -106,7 +120,7 @@ KaTeX 0.16.11 is bundled in `vendor/katex/` under its MIT licence (see `vendor/k
 }
 ```
 
-- `numbering` is one of `decimal`, `alpha`, `roman`, `none`.
+- `numbering` is one of `decimal`, `alpha`, `roman`, `none`. `language` is `en` or `sv`.
 - Generated problems keep their rendered text, so hand edits are never overwritten. Editing one in the app adds `"edited": true`.
 - Opening a file reports problems by position, for example `problem 3: missing "statement".`
 - Unknown extra fields are preserved.
@@ -115,5 +129,5 @@ KaTeX 0.16.11 is bundled in `vendor/katex/` under its MIT licence (see `vendor/k
 
 - `js/state.js` is the single source of truth. `js/schema.js` validates and migrates files. `js/storage.js` handles files and autosave.
 - `js/render.js` turns `$...$` text into KaTeX output without ever inserting user text as HTML.
-- `js/strings.js` holds every UI string, so translating means swapping one object.
+- `js/strings.js` holds the English UI strings and the language logic, `js/strings.sv.js` the Swedish ones. `js/generators/phrases.js` and `i18n.js` hold the wording and names for generators.
 - `js/export/exportHtml.js` builds the export (pure functions, tested in Node). `css/worksheet.css` is shared by the editor and the export. `css/app.css` is editor-only.

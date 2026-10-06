@@ -4,9 +4,6 @@ const unitParam = {
   key: 'unit', label: 'Unit', type: 'select', default: 'cm',
   options: [{ value: 'cm', label: 'cm' }, { value: 'm', label: 'm' }, { value: 'in', label: 'in' }, { value: 'ft', label: 'ft' }],
 };
-const length = (n, unit) => math(`${n}\\text{ ${unit}}`);
-const lengthTex = (n, unit) => `${n}\\text{ ${unit}}`;
-const areaTex = (n, unit) => `${n}\\text{ ${unit}}^2`;
 
 export default [
   {
@@ -21,16 +18,24 @@ export default [
       { key: 'maxSide', label: 'Longest side', type: 'int', default: 12, min: 3, max: 100 },
       unitParam,
     ],
-    generate(params, rng) {
+    generate(params, rng, p) {
       const w = rng.int(2, params.maxSide - 1);
       let l = rng.int(2, params.maxSide);
       if (l === w) l = w + 1; // a rectangle, not a square
       const quantity = params.quantity === 'mixed' ? rng.pick(['area', 'perimeter']) : params.quantity;
-      const u = params.unit;
-      const statement = `A rectangle has length ${length(l, u)} and width ${length(w, u)}. Find its ${quantity}.`;
+      const u = p.unit(params.unit);
+      const sides = { l: math(`${l}\\text{ ${u}}`), w: math(`${w}\\text{ ${u}}`) };
       return quantity === 'area'
-        ? { statement, answer: math(areaTex(l * w, u)), solution: `Area = length × width: ${math(`${l} \\times ${w} = ${areaTex(l * w, u)}`)}.` }
-        : { statement, answer: math(lengthTex(2 * (l + w), u)), solution: `Perimeter = 2 × (length + width): ${math(`2 \\times (${l} + ${w}) = ${lengthTex(2 * (l + w), u)}`)}.` };
+        ? {
+          statement: p('rectArea', sides),
+          answer: math(`${l * w}\\text{ ${u}}^2`),
+          solution: p('rectAreaSolution', { eq: math(`${l} ${p.times} ${w} = ${l * w}\\text{ ${u}}^2`) }),
+        }
+        : {
+          statement: p('rectPerimeter', sides),
+          answer: math(`${2 * (l + w)}\\text{ ${u}}`),
+          solution: p('rectPerimeterSolution', { eq: math(`2 ${p.times} (${l} + ${w}) = ${2 * (l + w)}\\text{ ${u}}`) }),
+        };
     },
   },
   {
@@ -41,16 +46,16 @@ export default [
       { key: 'maxSide', label: 'Largest base or height', type: 'int', default: 12, min: 3, max: 100 },
       unitParam,
     ],
-    generate(params, rng) {
+    generate(params, rng, p) {
       const b = rng.int(2, params.maxSide);
       let h = rng.int(2, params.maxSide);
       if ((b * h) % 2 !== 0) h = h < params.maxSide ? h + 1 : h - 1; // keeps the area a whole number
-      const u = params.unit;
+      const u = p.unit(params.unit);
       const area = (b * h) / 2;
       return {
-        statement: `A triangle has base ${length(b, u)} and height ${length(h, u)}. Find its area.`,
-        answer: math(areaTex(area, u)),
-        solution: `Area = ½ × base × height: ${math(`\\dfrac{1}{2} \\times ${b} \\times ${h} = ${areaTex(area, u)}`)}.`,
+        statement: p('triangle', { b: math(`${b}\\text{ ${u}}`), h: math(`${h}\\text{ ${u}}`) }),
+        answer: math(`${area}\\text{ ${u}}^2`),
+        solution: p('triangleSolution', { eq: math(`\\dfrac{1}{2} ${p.times} ${b} ${p.times} ${h} = ${area}\\text{ ${u}}^2`) }),
       };
     },
   },
@@ -66,14 +71,22 @@ export default [
       { key: 'maxRadius', label: 'Largest radius', type: 'int', default: 10, min: 2, max: 100 },
       unitParam,
     ],
-    generate(params, rng) {
+    generate(params, rng, p) {
       const r = rng.int(1, params.maxRadius);
       const quantity = params.quantity === 'mixed' ? rng.pick(['area', 'circumference']) : params.quantity;
-      const u = params.unit;
-      const statement = `A circle has radius ${length(r, u)}. Find its ${quantity}. Give the answer in terms of ${math('\\pi')}.`;
+      const u = p.unit(params.unit);
+      const vars = { r: math(`${r}\\text{ ${u}}`), pi: math('\\pi') };
       return quantity === 'area'
-        ? { statement, answer: math(`${r * r}\\pi\\text{ ${u}}^2`), solution: `${math(`A = \\pi r^2 = \\pi \\times ${r}^2 = ${r * r}\\pi\\text{ ${u}}^2`)}.` }
-        : { statement, answer: math(`${2 * r}\\pi\\text{ ${u}}`), solution: `${math(`C = 2\\pi r = 2\\pi \\times ${r} = ${2 * r}\\pi\\text{ ${u}}`)}.` };
+        ? {
+          statement: p('circleArea', vars),
+          answer: math(`${r * r}\\pi\\text{ ${u}}^2`),
+          solution: `${math(`A = \\pi r^2 = \\pi ${p.times} ${r}^2 = ${r * r}\\pi\\text{ ${u}}^2`)}.`,
+        }
+        : {
+          statement: p('circleCircumference', vars),
+          answer: math(`${2 * r}\\pi\\text{ ${u}}`),
+          solution: `${math(`C = 2\\pi r = 2\\pi ${p.times} ${r} = ${2 * r}\\pi\\text{ ${u}}`)}.`,
+        };
     },
   },
 ];

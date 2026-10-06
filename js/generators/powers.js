@@ -10,14 +10,14 @@ export default [
       { key: 'maxExponent', label: 'Largest exponent', type: 'int', default: 4, min: 2, max: 6 },
       { key: 'allowNegative', label: 'Allow negative bases', type: 'bool', default: false },
     ],
-    generate(params, rng) {
+    generate(params, rng, p) {
       const base = rng.int(2, params.maxBase) * (params.allowNegative ? rng.sign() : 1);
       const exp = rng.int(2, params.maxExponent);
       const result = base ** exp;
       const expr = `${paren(base)}^${exp}`;
-      const expanded = exp <= 4 ? `${Array(exp).fill(paren(base)).join(' \\times ')} = ` : '';
+      const expanded = exp <= 4 ? `${Array(exp).fill(paren(base)).join(` ${p.times} `)} = ` : '';
       return {
-        statement: `Calculate ${math(expr)}.`,
+        statement: p('calculate', { expr: math(expr) }),
         answer: math(String(result)),
         solution: `${math(`${expr} = ${expanded}${result}`)}.`,
       };
@@ -38,15 +38,15 @@ export default [
       },
       { key: 'maxRoot', label: 'Largest answer', type: 'int', default: 12, min: 2, max: 30 },
     ],
-    generate(params, rng) {
+    generate(params, rng, p) {
       const cube = params.rootType === 'cube' || (params.rootType === 'mixed' && rng.chance());
       const root = rng.int(2, params.maxRoot);
       const n = root ** (cube ? 3 : 2);
       const expr = cube ? `\\sqrt[3]{${n}}` : `\\sqrt{${n}}`;
       return {
-        statement: `Calculate ${math(expr)}.`,
+        statement: p('calculate', { expr: math(expr) }),
         answer: math(String(root)),
-        solution: `Since ${math(`${root}^${cube ? 3 : 2} = ${n}`)}, we get ${math(`${expr} = ${root}`)}.`,
+        solution: p('rootSolution', { pow: math(`${root}^${cube ? 3 : 2} = ${n}`), eq: math(`${expr} = ${root}`) }),
       };
     },
   },
@@ -66,7 +66,7 @@ export default [
       },
       { key: 'maxExponent', label: 'Largest exponent', type: 'int', default: 6, min: 3, max: 9 },
     ],
-    generate(params, rng) {
+    generate(params, rng, p) {
       const v = rng.pick(['x', 'y', 'a', 'n']);
       const law = params.law === 'mixed' ? rng.pick(['product', 'quotient', 'power']) : params.law;
       const max = params.maxExponent;
@@ -75,19 +75,19 @@ export default [
         const a = rng.int(2, max); const b = rng.int(2, max);
         expr = `${pow(v, a)} \\cdot ${pow(v, b)}`;
         result = pow(v, a + b);
-        rule = `When multiplying powers with the same base, add the exponents: ${math(`${expr} = ${v}^{${a} + ${b}} = ${result}`)}.`;
+        rule = p('lawProduct', { eq: math(`${expr} = ${v}^{${a} + ${b}} = ${result}`) });
       } else if (law === 'quotient') {
         const a = rng.int(3, max); const b = rng.int(1, a - 1);
         expr = `\\dfrac{${pow(v, a)}}{${pow(v, b)}}`;
         result = pow(v, a - b);
-        rule = `When dividing powers with the same base, subtract the exponents: ${math(`${expr} = ${v}^{${a} - ${b}} = ${result}`)}.`;
+        rule = p('lawQuotient', { eq: math(`${expr} = ${v}^{${a} - ${b}} = ${result}`) });
       } else {
         const a = rng.int(2, max); const b = rng.int(2, 4);
         expr = `(${pow(v, a)})^${b}`;
         result = pow(v, a * b);
-        rule = `For a power of a power, multiply the exponents: ${math(`${expr} = ${v}^{${a} \\times ${b}} = ${result}`)}.`;
+        rule = p('lawPower', { eq: math(`${expr} = ${v}^{${a} ${p.times} ${b}} = ${result}`) });
       }
-      return { statement: `Simplify ${math(expr)}.`, answer: math(result), solution: rule };
+      return { statement: p('simplify', { expr: math(expr) }), answer: math(result), solution: rule };
     },
   },
 ];

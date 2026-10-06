@@ -18,7 +18,7 @@ const reduced = ([n, d]) => gcd(n, d) === 1;
 /** Turns a tiny TeX polynomial / equation into JavaScript. */
 const toJs = (tex) => tex
   .replace(/\\dfrac\{([^}]*)\}\{([^}]*)\}/g, '(($1)/($2))')
-  .replace(/\\times|\\cdot/g, '*').replace(/\\div/g, '/')
+  .replace(/\\times|\\cdot/g, '*').replace(/\\div|\s:\s/g, '/')
   .replace(/(\d)\s*x/g, '$1*x')
   .replace(/\)\s*\(/g, ')*(')
   .replace(/\)\s*x/g, ')*x')
@@ -122,7 +122,7 @@ const SPECIFIC = {
     return null;
   },
   'quadratics.solve'(r) {
-    const poly = toJs(mathParts(r.statement)[1].replace(/= 0$/, ''));
+    const poly = toJs(mathParts(r.statement).at(-1).replace(/= 0$/, ''));
     const roots = [...firstMath(r.answer).matchAll(/x = (-?\d+)/g)].map((m) => Number(m[1]));
     if (roots.length === 0) return `no roots in ${r.answer}`;
     for (const x of roots) if (new Function('x', `return ${poly};`)(x) !== 0) return `x=${x} is not a root of ${poly}`;
@@ -135,16 +135,17 @@ const SPECIFIC = {
     return null;
   },
   'percentages.discount'(r) {
-    const price = Number(r.statement.match(/\\\$(\d+)/)[1]);
+    const price = Number(r.statement.match(/(\d+)/)[1]); // "$80" in English, "80 kr" in Swedish
     const p = parseInt(mathParts(r.statement)[0], 10);
     const sale = price * (100 - p) / 100;
-    if (!Number.isInteger(sale) || r.answer !== `\\$${sale}`) return `wrong: ${r.statement} -> ${r.answer}`;
+    if (!Number.isInteger(sale) || Number(r.answer.match(/(\d+)/)[1]) !== sale) return `wrong: ${r.statement} -> ${r.answer}`;
+    if (/\$/.test(r.answer.replace(/\\\$/g, '')) ) return `stray dollar sign in the answer: ${r.answer}`;
     return null;
   },
 };
 
 function checkLinear(r, p) {
-  const eq = mathParts(r.statement)[1];
+  const eq = mathParts(r.statement).at(-1);
   const answer = firstMath(r.answer).match(/^x = (-?\d+)$/);
   if (!answer) return `bad answer format: ${r.answer}`;
   const x = Number(answer[1]);
@@ -185,17 +186,18 @@ function variants(gen) {
  * Runs every generator over many seeds and parameter variants.
  * Returns { checked, failures: [{ generator, params, seed, problem }] }.
  */
-export function checkGenerators(generators, { seeds = 300, katex = null } = {}) {
+export function checkGenerators(generators, { seeds = 300, katex = null, languages = ['en', 'sv'] } = {}) {
   const failures = [];
   let checked = 0;
   for (const gen of generators) {
+    for (const lang of languages) {
     for (const rawParams of variants(gen)) {
       const params = normalizeParams(gen, rawParams);
       for (let seed = 1; seed <= seeds; seed++) {
         checked++;
-        const fail = (problem) => failures.push({ generator: gen.id, params, seed, problem });
+        const fail = (problem) => failures.push({ generator: gen.id, lang, params, seed, problem });
         let r;
-        try { r = generate(gen.id, params, seed * 7919); } catch (e) { fail(`threw: ${e.message}`); continue; }
+        try { r = generate(gen.id, params, seed * 7919, lang); } catch (e) { fail(`threw: ${e.message}`); continue; }
 
         for (const key of ['statement', 'answer', 'solution']) {
           if (typeof r[key] !== 'string' || !r[key].trim()) fail(`empty ${key}`);
@@ -207,7 +209,7 @@ export function checkGenerators(generators, { seeds = 300, katex = null } = {}) 
             }
           }
         }
-        const again = generate(gen.id, params, seed * 7919);
+        const again = generate(gen.id, params, seed * 7919, lang);
         if (again.statement !== r.statement || again.answer !== r.answer || again.solution !== r.solution) fail('same seed gave a different result');
 
         const specific = SPECIFIC[gen.id];
@@ -215,7 +217,9 @@ export function checkGenerators(generators, { seeds = 300, katex = null } = {}) 
         else {
           try { const msg = specific(r, params); if (msg) fail(msg); } catch (e) { fail(`check crashed: ${e.message} (${r.statement})`); }
         }
+        if (lang === 'sv' && /\b(Calculate|Solve|Simplify|Find|Factor|What is|Add|Subtract|Divide|Multiply)\b/.test(r.statement + r.solution)) fail(`English wording in Swedish output: ${r.statement}`);
       }
+    }
     }
   }
   return { checked, failures };

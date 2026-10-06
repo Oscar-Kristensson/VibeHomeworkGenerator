@@ -1,8 +1,12 @@
-// All user-facing text lives here so the UI can be translated by swapping this object.
+// All user-facing text lives here. English is the base; other languages live in strings.<code>.js
+// and fall back to English for any missing key. To add a language, see the README.
+import { sv } from './strings.sv.js';
+
 export const S = {
   'app.name': 'Mathsheet',
   'app.lang': 'en',
   'app.skip': 'Skip to the worksheet',
+  'app.language': 'Language',
 
   'file.new': 'New',
   'file.open': 'Open',
@@ -87,10 +91,13 @@ export const S = {
   'sheet.date': 'Date',
   'sheet.problems': 'Problems',
   'sheet.worksheet': 'Worksheet',
+  'sheet.noName': 'Untitled worksheet',
 
   'controls.showAnswers': 'Show answers here',
   'controls.nameDate': 'Name and date lines',
   'controls.numbering': 'Numbering',
+  'controls.language': 'Worksheet language',
+  'controls.languageHint': 'Sets the wording of generated problems and the labels in exported files. Problems that already exist keep their text.',
   'numbering.decimal': '1, 2, 3',
   'numbering.alpha': 'a, b, c',
   'numbering.roman': 'i, ii, iii',
@@ -146,14 +153,48 @@ export const S = {
   'error.invalidJson': 'The file is not valid JSON ({msg}).',
 };
 
-export function t(key, vars = {}) {
-  const template = S[key] ?? key;
+export const LANGUAGES = [
+  { code: 'en', name: 'English' },
+  { code: 'sv', name: 'Svenska' },
+];
+const DICTS = { en: S, sv };
+export const isLanguage = (code) => Object.hasOwn(DICTS, code);
+
+const LANG_KEY = 'mathsheet.lang';
+
+function detectLanguage() {
+  try {
+    const fromUrl = new URLSearchParams(location.search).get('lang');
+    if (isLanguage(fromUrl)) return fromUrl;
+    const saved = localStorage.getItem(LANG_KEY);
+    if (isLanguage(saved)) return saved;
+    const browser = (navigator.language || 'en').slice(0, 2).toLowerCase();
+    if (isLanguage(browser)) return browser;
+  } catch { /* not in a browser: use English */ }
+  return 'en';
+}
+
+let current = detectLanguage();
+
+/** The interface language. */
+export const getLanguage = () => current;
+
+/** Remembers the choice; the page is reloaded afterwards so every string is redrawn. */
+export function setLanguage(code) {
+  if (!isLanguage(code)) return;
+  current = code;
+  try { localStorage.setItem(LANG_KEY, code); } catch { /* best effort */ }
+}
+
+/** Looks up a string. Pass lang to use another language than the interface (the export does this). */
+export function t(key, vars = {}, lang = current) {
+  const template = DICTS[lang]?.[key] ?? S[key] ?? key;
   return template.replace(/\{(\w+)\}/g, (_, name) => (name in vars ? String(vars[name]) : `{${name}}`));
 }
 
 /** Picks "<key>.one" or "<key>.other" depending on n. */
-export function tn(key, n, vars = {}) {
-  return t(`${key}.${n === 1 ? 'one' : 'other'}`, { n, ...vars });
+export function tn(key, n, vars = {}, lang = current) {
+  return t(`${key}.${n === 1 ? 'one' : 'other'}`, { n, ...vars }, lang);
 }
 
 /** Fills elements marked with data-i18n, data-i18n-title, data-i18n-placeholder, data-i18n-label. */

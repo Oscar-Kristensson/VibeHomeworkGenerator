@@ -63,9 +63,10 @@
 
     try {
       const sample = await (await fetch('examples/sample-worksheet.json')).json();
+      const svSample = await (await fetch('examples/sample-worksheet.sv.json')).json();
       const katex = window.katex;
 
-      section('Core', runCoreChecks({ katex, sample }));
+      section('Core', runCoreChecks({ katex, sample, svSample }));
       await pause();
 
       const gen = checkGenerators(generators, { seeds, katex });

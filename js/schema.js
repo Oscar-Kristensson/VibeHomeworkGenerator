@@ -1,4 +1,6 @@
 // Worksheet data model: defaults, validation and version migrations.
+import { LANGUAGES, getLanguage, isLanguage } from './strings.js';
+
 export const SCHEMA_VERSION = 1;
 export const NUMBERINGS = ['decimal', 'alpha', 'roman', 'none'];
 export const PROBLEM_TYPES = ['custom', 'generated'];
@@ -14,11 +16,12 @@ export function uid() {
   return 'p_' + Math.random().toString(36).slice(2, 8) + Date.now().toString(36).slice(-3);
 }
 
-export function newWorksheet() {
+/** language: wording of generated problems and labels in exported files. New worksheets follow the interface language. */
+export function newWorksheet(language = getLanguage()) {
   const now = new Date().toISOString();
   return {
     schemaVersion: SCHEMA_VERSION,
-    meta: { title: '', subject: '', createdAt: now, updatedAt: now },
+    meta: { title: '', subject: '', language, createdAt: now, updatedAt: now },
     settings: { showAnswers: false, showNameDateFields: true, numbering: 'decimal' },
     problems: [],
   };
@@ -60,6 +63,12 @@ export function validateWorksheet(raw) {
   // meta
   if (data.meta !== undefined && !isObj(data.meta)) errors.push('meta must be an object.');
   const meta = { ...base.meta, ...(isObj(data.meta) ? data.meta : {}) };
+  // Files from before languages existed are English.
+  if (data.meta === undefined || !isObj(data.meta) || data.meta.language === undefined) meta.language = 'en';
+  else if (!isLanguage(meta.language)) {
+    errors.push(`meta.language must be one of: ${LANGUAGES.map((l) => l.code).join(', ')}.`);
+    meta.language = 'en';
+  }
   for (const key of ['title', 'subject', 'createdAt', 'updatedAt']) {
     if (typeof meta[key] !== 'string') {
       errors.push(`meta.${key} must be text.`);

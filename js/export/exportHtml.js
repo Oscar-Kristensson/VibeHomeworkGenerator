@@ -64,18 +64,21 @@ function shuffled(list) {
  */
 export function buildExportHtml(worksheet, options, assets) {
   const o = { ...DEFAULT_OPTIONS, ...options };
+  const lang = worksheet.meta.language ?? 'en';
+  const L = (key, vars) => t(key, vars, lang);
+  const LN = (key, n) => tn(key, n, {}, lang);
   const mathErrors = [];
   const render = (text) => renderToHtml(text, assets.katex, (msg) => mathErrors.push(msg));
 
   const { meta, settings } = worksheet;
-  const title = meta.title.trim() || t('worksheet.untitled');
+  const title = meta.title.trim() || L('worksheet.untitled');
   const problems = o.shuffle ? shuffled(worksheet.problems) : worksheet.problems;
   const totalPoints = Math.round(worksheet.problems.reduce((sum, p) => sum + p.points, 0) * 100) / 100;
   // "no numbering" is fine on the worksheet, but an answer key needs numbers to be matchable
   const keyNumbering = settings.numbering === 'none' ? 'decimal' : settings.numbering;
 
   const problemItems = problems.map((p) => `<li class="ws-problem">`
-    + (o.showPoints ? `<span class="ws-points-tag">${escapeHtml(tn('problem.pts', p.points))}</span>` : '')
+    + (o.showPoints ? `<span class="ws-points-tag">${escapeHtml(LN('problem.pts', p.points))}</span>` : '')
     + `<div class="ws-statement">${render(p.statement)}</div></li>`).join('\n');
 
   let answerKey = '';
@@ -84,13 +87,13 @@ export function buildExportHtml(worksheet, options, assets) {
       const parts = [];
       if (p.answer.trim()) parts.push(`<div class="ws-answer">${render(p.answer)}</div>`);
       if (o.includeSolutions && p.solution.trim()) {
-        parts.push(`<div class="ws-solution"><strong>${escapeHtml(t('problem.solution'))}</strong> ${render(p.solution)}</div>`);
+        parts.push(`<div class="ws-solution"><strong>${escapeHtml(L('problem.solution'))}</strong> ${render(p.solution)}</div>`);
       }
       if (parts.length === 0) parts.push('<div class="ws-solution">&mdash;</div>');
       return `<li class="ws-problem">${parts.join('')}</li>`;
     }).join('\n');
     answerKey = `<section class="ws-answer-key${o.answerKeyOnNewPage ? ' new-page' : ''}">
-<h2>${escapeHtml(t('export.answerKey'))}</h2>
+<h2>${escapeHtml(L('export.answerKey'))}</h2>
 <ol class="ws-problems" data-numbering="${keyNumbering}">
 ${items}
 </ol>
@@ -103,7 +106,7 @@ ${items}
     : '';
 
   const html = `<!doctype html>
-<html lang="${escapeHtml(t('app.lang'))}">
+<html lang="${escapeHtml(lang)}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -120,8 +123,8 @@ ${EXPORT_CSS}
 <header class="ws-header">
 <h1 class="ws-title">${escapeHtml(title)}</h1>
 ${meta.subject.trim() ? `<p class="ws-subject">${escapeHtml(meta.subject.trim())}</p>` : ''}
-${settings.showNameDateFields ? `<div class="ws-fields"><span class="ws-field">${escapeHtml(t('sheet.name'))}</span><span class="ws-field">${escapeHtml(t('sheet.date'))}</span></div>` : ''}
-${o.showPoints && totalPoints > 0 ? `<p class="ws-total">${escapeHtml(tn('controls.total', totalPoints))}</p>` : ''}
+${settings.showNameDateFields ? `<div class="ws-fields"><span class="ws-field">${escapeHtml(L('sheet.name'))}</span><span class="ws-field">${escapeHtml(L('sheet.date'))}</span></div>` : ''}
+${o.showPoints && totalPoints > 0 ? `<p class="ws-total">${escapeHtml(LN('controls.total', totalPoints))}</p>` : ''}
 </header>
 <ol class="ws-problems" data-numbering="${settings.numbering}">
 ${problemItems}
